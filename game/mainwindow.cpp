@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include <QDebug>
+#include <QGraphicsSceneMouseEvent>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // 設定 view 視窗相關設定
@@ -19,7 +21,22 @@ void MainWindow::update_frame() {
     this->setCentralWidget(view);
 }
 
-void MainWindow::mousePressEvent(QMouseEvent *event) {
-
+bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
+    if (watched == cur_scene) {
+        // Press Event
+        QGraphicsSceneMouseEvent *mouseSceneEvent;
+        if (event->type() == QEvent::GraphicsSceneMousePress) {
+            mouseSceneEvent = static_cast<QGraphicsSceneMouseEvent *>(event);
+            qDebug() << mouseSceneEvent->scenePos()
+                     << mouseSceneEvent->lastScenePos();
+        }
+    }
+    return MainWindow::eventFilter(watched, event);
 }
+
+
+
+
+
+
 

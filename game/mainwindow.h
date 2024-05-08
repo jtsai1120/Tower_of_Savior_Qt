@@ -5,9 +5,11 @@
 #include <QTimer>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QGraphicsItem>
 #include <QPixmap>
 #include <QPushButton>
-#include <QMouseEvent>
+#include <QEvent>
+#include <QPoint>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -18,10 +20,8 @@ public:
 protected:
 
 
-
 private slots:
     void update_frame(); // 畫面更新
-    void mousePressEvent(QMouseEvent *event);
 
 
 private:
@@ -32,8 +32,6 @@ private:
     void game_init();
 
     QTimer *update_timer;
-
-
 
 };
 
