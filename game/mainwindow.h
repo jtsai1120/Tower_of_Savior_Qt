@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QEvent>
 #include <QPoint>
+//#include "EventFilter.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -25,6 +26,8 @@ private slots:
 
 
 private:
+    //EventFilter ef;
+
     QGraphicsView *view = new QGraphicsView;
     QGraphicsScene *cur_scene;
     QGraphicsScene game_scene;

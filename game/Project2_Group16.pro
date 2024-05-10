@@ -13,6 +13,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    EventFilter.h \
     mainwindow.h
 
 # Default rules for deployment.

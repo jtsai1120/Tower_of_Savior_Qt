@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include <QDebug>
-#include <QGraphicsSceneMouseEvent>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // 設定 view 視窗相關設定
@@ -11,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     update_timer = new QTimer(this);
     update_timer->start(1);
     connect(update_timer, SIGNAL(timeout()), this, SLOT(update_frame()));
+    //this->installEventFilter(&ef);
 
     // temp
     cur_scene = &game_scene;
@@ -19,19 +19,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 void MainWindow::update_frame() {
     view->setScene(cur_scene);
     this->setCentralWidget(view);
-}
-
-bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
-    if (watched == cur_scene) {
-        // Press Event
-        QGraphicsSceneMouseEvent *mouseSceneEvent;
-        if (event->type() == QEvent::GraphicsSceneMousePress) {
-            mouseSceneEvent = static_cast<QGraphicsSceneMouseEvent *>(event);
-            qDebug() << mouseSceneEvent->scenePos()
-                     << mouseSceneEvent->lastScenePos();
-        }
-    }
-    return MainWindow::eventFilter(watched, event);
 }
 
 
