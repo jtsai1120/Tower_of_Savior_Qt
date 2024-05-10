@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QDebug>
+#include "EventFilter.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // 設定 view 視窗相關設定
@@ -10,15 +11,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     update_timer = new QTimer(this);
     update_timer->start(1);
     connect(update_timer, SIGNAL(timeout()), this, SLOT(update_frame()));
-    //this->installEventFilter(&ef);
 
-    // temp
+    //this->setCentralWidget(view);
+    //view->installEventFilter(this);
     cur_scene = &game_scene;
 }
 
 void MainWindow::update_frame() {
     view->setScene(cur_scene);
-    this->setCentralWidget(view);
 }
 
 

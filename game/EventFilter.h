@@ -9,11 +9,11 @@
 class EventFilter : public QObject {
     Q_OBJECT
 public:
-    explicit EventFilter(QObject *parent = nullptr) : QObject(parent) {}
+    //explicit EventFilter(QObject *parent = nullptr) : QObject(parent) {}
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override {
-        if (event->type() == QEvent::MouseButtonPress) {
+        if (event->type() == QEvent::MouseButtonRelease) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
             qDebug() << "Mouse release event in MainWindow:"
                      << "Position:" << mouseEvent->pos()
