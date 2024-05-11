@@ -10,39 +10,48 @@
 #include <QPushButton>
 #include <QEvent>
 #include <QPoint>
-#include <QDebug>
 #include <QMouseEvent>
+#include <QLabel>
+#include <QSound>
+#include <vector>
+#include <random>
+#include "bg.h"
+#include "icon_bar.h"
+#include "runestone.h"
+using namespace std;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    void random_runestone();
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) override {
-        if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-            qDebug() << "Mouse button released at position:" << mouseEvent->pos();
-            // 处理鼠标释放事件
-            return true; // 返回 true 表示事件已处理
-        }
-
-        return QMainWindow::eventFilter(watched, event);
-    }
-private slots:
-    void update_frame(); // 畫面更新
-
+    void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
 
 private:
-    QGraphicsView *view = new QGraphicsView;
-    QGraphicsScene *cur_scene;
-    QGraphicsScene game_scene;
+    Bg *bg; // battle_bg, runestone_bg, battle_bgm
+    Icon_bar *icon_bar; // cd_icon, hp_icon, cd_bar, hp_bar
 
-    void game_init();
+    vector<vector<Runestone*>> runestones;
+    random_device rd;
+    uniform_int_distribution<int> dist;
 
-    QTimer *update_timer;
+    bool can_move_runestone;
+    pair<int,int> selected_runestone;
+    bool runestone_selected;
+    bool runestone_swap;
+    bool runestone_drift;
+    QTimer *drift_timer;
+    bool drift_timer_started;
+    int ms_elapsed;
+    const int time_limit = 4;
 
+    int hp;
 };
 
 #endif // MAINWINDOW_H
