@@ -40,5 +40,11 @@
         <file>dataset/battle_bgm.wav</file>
         <file>dataset/ui/battle_bg.png</file>
         <file>dataset/close_hi_hat.wav</file>
+        <file>dataset/halo_vfx/dark_halo_pic.png</file>
+        <file>dataset/halo_vfx/earth_halo_pic.png</file>
+        <file>dataset/halo_vfx/fire_halo_pic.png</file>
+        <file>dataset/halo_vfx/heart_halo_pic.png</file>
+        <file>dataset/halo_vfx/light_halo_pic.png</file>
+        <file>dataset/halo_vfx/water_halo_pic.png</file>
     </qresource>
 </RCC>

@@ -21,16 +21,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     drift_timer_started = false;
 
     hp = 2000;
-}
 
-void MainWindow::random_runestone() {
-    mt19937 gen(rd());
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 6; j++) {
-            delete runestones[i][j];
-            runestones[i][j] = new Runestone(this, i, j, dist(gen)%6);
-        }
-    }
+    light_halo_vfx = new Light_halo_vfx(this);
+
+    combo_cd = new QTimer;
 }
 
 void MainWindow::paintEvent(QPaintEvent *event) {
@@ -40,11 +34,26 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     }
 }
 
+void MainWindow::random_runestone() {
+    auto seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 gen(seed);
+    uniform_int_distribution<int> dist(0, 5);
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 6; j++) {
+            delete runestones[i][j];
+            runestones[i][j] = new Runestone(this, i, j, dist(gen));
+        }
+    }
+    // 讓盤面先經過消珠直到不會有任3顆連線
+}
+
 void MainWindow::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         if (event->y() >= 510) {
             if (can_move_runestone) {
                 runestone_selected = true;
+                selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
+                runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
             }
         }
     }
@@ -53,15 +62,36 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         runestone_selected = false;
-        // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
-        runestone_drift = false;
-        runestone_selected = false;
-        can_move_runestone = false;
-        icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-        // 呼叫計算 Combo 的函數
-
+        if (runestone_drift) {
+            // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
+            runestone_drift = false;
+            runestone_selected = false;
+            can_move_runestone = false;
+            icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
+            runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
+            // 計算 Combo
+            combo_count();
+        }
     }
+}
+
+void MainWindow::combo_count() {
+    combo_counter_result = combo_counter.count(runestones);
+    qDebug() << "Combo:" << combo_counter_result.size();
+    cur_pair_num = 0;
+    connect(combo_cd, &QTimer::timeout, [&]{
+        qDebug() << cur_pair_num;
+        Runestone_pair cur_pair = combo_counter_result[cur_pair_num];
+        for (pair<int,int> pii : cur_pair.pair)
+            runestones[pii.first][pii.second]->change_color("empty");
+        //light_halo_vfx->show(cur_pair);
+        cur_pair_num++;
+        if (cur_pair_num == int(combo_counter_result.size())) {
+            combo_cd->stop();
+        }
+    });
+    combo_cd->start(500);
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
@@ -86,10 +116,8 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             runestones[(event->y()-510)/90][event->x()/90]->change_color(runestones[selected_runestone.first][selected_runestone.second]->get_color());
             runestones[selected_runestone.first][selected_runestone.second]->change_color(tmp);
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-            selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
-            runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
+            selected_runestone = make_pair((event->y()-510)/90, event->x()/90); 
         }
-        selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
         runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
         if (!drift_timer_started && runestone_swap) {
             // 開始計時

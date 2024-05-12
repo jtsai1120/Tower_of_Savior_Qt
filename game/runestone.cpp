@@ -53,6 +53,7 @@ void Runestone::change_color(QString clr) {
     else if (clr == "heart") runestone->setPixmap(heart_stone_pic);
     else if (clr == "light") runestone->setPixmap(light_stone_pic);
     else if (clr == "water") runestone->setPixmap(water_stone_pic);
+    else if (clr == "empty") runestone->setPixmap(QPixmap());
 }
 
 void Runestone::stick_cursor(int _x, int _y) {

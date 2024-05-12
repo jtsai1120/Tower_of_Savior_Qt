@@ -11,16 +11,21 @@ CONFIG += c++11
 
 SOURCES += \
     bg.cpp \
+    combo_counter.cpp \
     icon_bar.cpp \
+    light_halo_vfx.cpp \
     main.cpp \
     mainwindow.cpp \
     runestone.cpp
 
 HEADERS += \
     bg.h \
+    combo_counter.h \
     icon_bar.h \
+    light_halo_vfx.h \
     mainwindow.h \
-    runestone.h
+    runestone.h \
+    runestone_pair.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

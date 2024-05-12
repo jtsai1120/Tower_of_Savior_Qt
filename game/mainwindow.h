@@ -15,9 +15,13 @@
 #include <QSound>
 #include <vector>
 #include <random>
+#include <chrono>
 #include "bg.h"
 #include "icon_bar.h"
 #include "runestone.h"
+#include "runestone_pair.h"
+#include "combo_counter.h"
+#include "light_halo_vfx.h"
 using namespace std;
 
 class MainWindow : public QMainWindow {
@@ -25,7 +29,11 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow(QWidget *parent = nullptr);
+
     void random_runestone();
+
+    Combo_counter combo_counter;
+    void combo_count();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -38,8 +46,6 @@ private:
     Icon_bar *icon_bar; // cd_icon, hp_icon, cd_bar, hp_bar
 
     vector<vector<Runestone*>> runestones;
-    random_device rd;
-    uniform_int_distribution<int> dist;
 
     bool can_move_runestone;
     pair<int,int> selected_runestone;
@@ -49,9 +55,15 @@ private:
     QTimer *drift_timer;
     bool drift_timer_started;
     int ms_elapsed;
-    const int time_limit = 4;
+    const int time_limit = 10;
 
     int hp;
+
+    Light_halo_vfx *light_halo_vfx;
+
+    vector<Runestone_pair> combo_counter_result;
+    int cur_pair_num;
+    QTimer *combo_cd;
 };
 
 #endif // MAINWINDOW_H
