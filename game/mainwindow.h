@@ -33,8 +33,8 @@ public:
     QString random_runestone_color();
 
     Combo_counter combo_counter;
-    void combo_count_and_drop();
-    //void combo_count();
+    void combo_count_and_drop(bool is_first_count = true);
+    void combo_count();
     void drop_detect();
 
 public slots:
@@ -72,12 +72,16 @@ private:
     vector<Light_halo_vfx*> light_halo_vfxs;
 
     vector<Runestone_pair> combo_counter_result;
-    int combo;
+    int combo, cur_stage_combo;
     int cur_pair_num;
     QTimer *combo_cd;
 
     vector<int> col_bottom;
     QTimer *drop_timer;
+    int drop_interval;
+    const int drop_acceleration = 19;
+
+    QLabel *combo_text;
 };
 
 #endif // MAINWINDOW_H

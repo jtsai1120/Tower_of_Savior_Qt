@@ -29,23 +29,50 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     runestone_swap = false;
     runestone_drift = false;
     ms_elapsed = 0;
-    drift_timer = new QTimer;
+    drift_timer = new QTimer(this);
+    drift_timer->setInterval(1);
+    connect(drift_timer, &QTimer::timeout, [&]() {
+        ms_elapsed++;
+        update();
+    });
     drift_timer_started = false;
 
     hp = 2000;
 
-    light_halo_vfxs.resize(30);
     combo_cd = new QTimer;
     connect(combo_cd, SIGNAL(timeout()), this, SLOT(combo_eliminate()));
 
     drop_timer = new QTimer;
     connect(drop_timer, SIGNAL(timeout()), this, SLOT(drop_trigger()));
+
+    combo_text = new QLabel(this);
+    QFont combo_text_font("Consolas", 35, QFont::Bold);
+    combo_text->setFont(combo_text_font);
+    combo_text->setStyleSheet("color: yellow");
+    combo_text->resize(300, 200);
+    combo_text->move(540-300, 960-200);
+    combo_text->hide();
 }
 
 void MainWindow::paintEvent(QPaintEvent *event) {
     if (runestone_drift) {
+        qDebug() << ms_elapsed;
+        if (ms_elapsed>=time_limit*1000) {
+            // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
+            drift_timer->stop();
+            drift_timer_started = false;
+            runestone_drift = false;
+            runestone_selected = false;
+            can_move_runestone = false;
+            icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
+            runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
+            // 計算 Combo
+            qDebug() << "call combo_count_and_drop (timeup)";
+            combo_count_and_drop(true);
+        }
         // 依時間改變 cd_bar 長度
-        icon_bar->change_status("cd" ,double(ms_elapsed)/double(time_limit*1000));
+        icon_bar->change_status("cd" , double(ms_elapsed)/double(time_limit*1000));
+
     }
 }
 
@@ -86,57 +113,41 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
         if (runestone_drift) {
             // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
+            drift_timer->stop();
+            drift_timer_started = false;
             runestone_drift = false;
             runestone_selected = false;
             can_move_runestone = false;
             icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
             // 計算 Combo
-            combo_count_and_drop();
+            qDebug() << "call combo_count_and_drop (mouseRelease)";
+            combo_count_and_drop(true);
         }
     }
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
-    if (ms_elapsed>=time_limit*1000) {
-        ms_elapsed = 0;
-        //qDebug() << "timeup";
-        drift_timer->stop();
-        drift_timer_started = false;
-        // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
-        runestone_drift = false;
-        runestone_selected = false;
-        can_move_runestone = false;
-        icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
-        runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-        // 計算 Combo
-        combo_count_and_drop();
-    }
     if (runestone_selected) {
         runestone_swap = ((event->y()-510)/90!=selected_runestone.first || event->x()/90!=selected_runestone.second);
         if (runestone_swap) {
+            //qDebug() << "swap";
             QSound::play(":/dataset/close_hi_hat.wav");
             QString tmp = runestones[(event->y()-510)/90][event->x()/90]->get_color();
             runestones[(event->y()-510)/90][event->x()/90]->change_color(runestones[selected_runestone.first][selected_runestone.second]->get_color());
             runestones[selected_runestone.first][selected_runestone.second]->change_color(tmp);
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
             selected_runestone = make_pair((event->y()-510)/90, event->x()/90); 
+            if (!drift_timer_started) { // 開始計時
+                ms_elapsed = 0; // 計時器 (經過多少 ms)
+                qDebug() << "start countdown";
+                runestone_drift = true;
+                drift_timer_started = true;
+                drift_timer->start();
+            }
         }
         runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
-        if (!drift_timer_started && runestone_swap) {
-            // 開始計時
-            drift_timer->start(1); // 每 1ms 觸發器
-            ms_elapsed = 0; // 計時器 (經過多少 ms)
-            connect(drift_timer, &QTimer::timeout, [&]() {
-                ms_elapsed++;
-                update();
-            });
-            //qDebug() << "start countdown";
-            runestone_drift = true;
-            drift_timer_started = true;
-        }
     }
-
     if (runestone_drift) {
         // 使 Cursor 無法移動到畫面外導致 Crash
         QRect windowRect = this->geometry();
@@ -159,26 +170,44 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     }
 }
 
-void MainWindow::combo_count_and_drop() {
-    combo_counter_result = combo_counter.count(runestones);
-    combo = combo_counter_result.size();
-    if (!light_halo_vfxs.empty()) {
-        for (auto i : light_halo_vfxs)
-            delete i;
+void MainWindow::combo_count_and_drop(bool is_first_count) {
+    if (is_first_count) {
+        // Reset
+        qDebug() << "reset combo count";
+        combo = 0;
+        combo_count();
+    } else {
+        for (int i = 0; i < cur_pair_num; i++) delete light_halo_vfxs[i];
         light_halo_vfxs.clear();
+        if (combo_counter.count(runestones).empty()) {
+            qDebug() << "final combo : " << combo;
+            combo_text->hide();
+            can_move_runestone = true;
+            return;
+        } else combo_count();
     }
+}
+
+void MainWindow::combo_count() {
+    combo_counter_result = combo_counter.count(runestones);
+    cur_stage_combo = combo_counter_result.size();
+    if (cur_stage_combo == 0) {
+        qDebug() << "No Combo";
+        can_move_runestone = true;
+        return;
+    }
+    combo_text->show();
     cur_pair_num = 0;
     combo_eliminate();
     combo_cd->start(390);
 }
 
 void MainWindow::combo_eliminate() {
-    if (cur_pair_num == combo) {
+    if (cur_pair_num == cur_stage_combo) {
         combo_cd->stop();
         drop_detect();
         return;
     }
-    qDebug() << "combo" << cur_pair_num;
     Runestone_pair cur_pair = combo_counter_result[cur_pair_num];
     for (pair<int,int> pii : cur_pair.pair)
         runestones[pii.first][pii.second]->change_color("empty");
@@ -213,21 +242,27 @@ void MainWindow::combo_eliminate() {
     default:
         QSound::play(":/dataset/combo_sound/combo10.wav");
     }
-    light_halo_vfxs[cur_pair_num] = new Light_halo_vfx(this);
+    light_halo_vfxs.push_back(new Light_halo_vfx(this));
     light_halo_vfxs[cur_pair_num]->show(cur_pair);
     cur_pair_num++;
+    combo++;
+    combo_text->setText(QString::number(combo) + " Combo");
 }
 
 void MainWindow::drop_detect() {
     col_bottom = vector<int>(6, 4);
-    drop_timer->start(157);
+    drop_interval = 187;
+    drop_timer->start(drop_interval);
     drop_trigger();
 }
 
 void MainWindow::drop_trigger() {
+    drop_timer->stop();
     if (std::count(col_bottom.begin(), col_bottom.end(), -1)==6) {
-        drop_timer->stop();
-        //qDebug() << "out";
+        for (int i = 0; i < 5; i++)
+            for (int j = 0; j < 6; j++)
+                runestones[i][j]->move(i, j);
+        combo_count_and_drop(false); // count combo and drop again
         return;
     }
     for (int col = 0; col < 6; col++) {
@@ -239,11 +274,12 @@ void MainWindow::drop_trigger() {
             continue;
         if (col_bottom[col] != 0) {// 如果是 0 就直接放新的隨機珠子就好了
             for (int row = col_bottom[col]; row > 0; row--) {
-                runestones[row][col]->drop(runestones[row-1][col]->get_color());
+                runestones[row][col]->drop(runestones[row-1][col]->get_color(), drop_interval);
             }
         }
-        runestones[0][col]->drop(random_runestone_color());
+        runestones[0][col]->drop(random_runestone_color(), drop_interval);
     }
-    //qDebug() << col_bottom[0] << col_bottom[1] << col_bottom[2] << col_bottom[3] << col_bottom[4] << col_bottom[5];
+    drop_interval -= drop_acceleration;
+    drop_timer->start(drop_interval);
 }
 

@@ -16,7 +16,7 @@ public:
     void move(int row, int col);
     void change_color(QString clr);
 
-    void drop(QString after_drop_change_clr);
+    void drop(QString after_drop_change_clr, int drop_speed);
 
     void stick_cursor(int _x, int _y);
 
