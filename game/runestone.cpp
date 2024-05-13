@@ -43,9 +43,9 @@ void Runestone::stick_cursor(int _x, int _y) {
     runestone->move(_x-dark_stone_pic.width()/2-10, _y-dark_stone_pic.height()/2-10);
 }
 
-void Runestone::drop(QString after_drop_change_clr) {
+void Runestone::drop(QString after_drop_change_clr, int drop_speed) {
     change_color(after_drop_change_clr);
-    animation->setDuration(150);
+    animation->setDuration(drop_speed-30);
     animation->setStartValue(QPoint(runestone->x(), runestone->y()-90));
     animation->setEndValue(QPoint(runestone->x(), runestone->y()));
     animation->start();
