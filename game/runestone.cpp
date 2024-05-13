@@ -14,6 +14,8 @@ Runestone::Runestone(QWidget *parent, int _row, int _col, QString clr) {
     move(_row, _col);
     change_color(clr);
     runestone->show();
+
+    animation = new QPropertyAnimation(runestone, "pos");
 }
 
 Runestone::~Runestone() {
@@ -41,6 +43,13 @@ void Runestone::stick_cursor(int _x, int _y) {
     runestone->move(_x-dark_stone_pic.width()/2-10, _y-dark_stone_pic.height()/2-10);
 }
 
+void Runestone::drop(QString after_drop_change_clr) {
+    change_color(after_drop_change_clr);
+    animation->setDuration(150);
+    animation->setStartValue(QPoint(runestone->x(), runestone->y()-90));
+    animation->setEndValue(QPoint(runestone->x(), runestone->y()));
+    animation->start();
+}
 
 
 

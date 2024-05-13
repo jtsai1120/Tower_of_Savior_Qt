@@ -3,6 +3,7 @@
 
 #include <QPixmap>
 #include <QLabel>
+#include <QPropertyAnimation>
 using namespace std;
 
 class Runestone {
@@ -14,6 +15,8 @@ public:
 
     void move(int row, int col);
     void change_color(QString clr);
+
+    void drop(QString after_drop_change_clr);
 
     void stick_cursor(int _x, int _y);
 
@@ -29,6 +32,8 @@ private:
     QString color;
     QString speicial_status;
     int row, col;
+
+    QPropertyAnimation *animation;
 };
 
 #endif // RUNESTONE_H

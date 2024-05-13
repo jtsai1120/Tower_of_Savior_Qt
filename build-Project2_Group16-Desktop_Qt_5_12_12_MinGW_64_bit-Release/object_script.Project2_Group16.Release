@@ -1,0 +1,10 @@
+release/bg.o
+release/combo_counter.o
+release/icon_bar.o
+release/light_halo_vfx.o
+release/main.o
+release/mainwindow.o
+release/runestone.o
+release/qrc_data.o
+release/moc_light_halo_vfx.o
+release/moc_mainwindow.o

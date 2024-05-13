@@ -3,6 +3,7 @@
 #include <QCursor>
 #include <algorithm>
 
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setFixedSize(540, 960);
     setMouseTracking(true);
@@ -38,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(combo_cd, SIGNAL(timeout()), this, SLOT(combo_eliminate()));
 
     drop_timer = new QTimer;
-
+    connect(drop_timer, SIGNAL(timeout()), this, SLOT(drop_trigger()));
 }
 
 void MainWindow::paintEvent(QPaintEvent *event) {
@@ -99,7 +100,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     if (ms_elapsed>=time_limit*1000) {
         ms_elapsed = 0;
-        qDebug() << "timeup";
+        //qDebug() << "timeup";
         drift_timer->stop();
         drift_timer_started = false;
         // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
@@ -130,7 +131,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
                 ms_elapsed++;
                 update();
             });
-            qDebug() << "start countdown";
+            //qDebug() << "start countdown";
             runestone_drift = true;
             drift_timer_started = true;
         }
@@ -177,6 +178,7 @@ void MainWindow::combo_eliminate() {
         drop_detect();
         return;
     }
+    qDebug() << "combo" << cur_pair_num;
     Runestone_pair cur_pair = combo_counter_result[cur_pair_num];
     for (pair<int,int> pii : cur_pair.pair)
         runestones[pii.first][pii.second]->change_color("empty");
@@ -217,37 +219,31 @@ void MainWindow::combo_eliminate() {
 }
 
 void MainWindow::drop_detect() {
-
     col_bottom = vector<int>(6, 4);
-    connect(drop_timer, SIGNAL(timeout()), this, SLOT(drop_trigger()));
-    drop_timer->start(500);
-    // 寫偵測直到不可再掉落
+    drop_timer->start(157);
     drop_trigger();
 }
 
 void MainWindow::drop_trigger() {
-    //while(std::count(col_bottom.begin(), col_bottom.end(), -1)!=6) {
-
-        for (int col = 0; col < 6; col++) {
-            // 找最上面的空白珠
-            while(col_bottom[col] >= 0 && runestones[col_bottom[col]][col]->get_color() != "empty") {
-                qDebug() << "col: " << col << ", bottom = " << col_bottom[col] << ", color = " << runestones[col_bottom[col]][col]->get_color();
-                col_bottom[col]--;
-            }
-            if (col_bottom[col] == -1) // 代表該 col 完全不用 drop
-                continue;
-            qDebug() << "col: " << col << ", bottom = " << col_bottom[col] << ", empty";
-            if (col_bottom[col] != 0) {// 如果是 0 就直接放新的隨機珠子就好了
-                for (int row = col_bottom[col]; row > 0; row--) {
-                    qDebug() << "row " << row << "change to " << runestones[row-1][col]->get_color();
-                    runestones[row][col]->change_color(runestones[row-1][col]->get_color());
-                    qDebug() << runestones[row][col]->get_color() <<"finish";
-                }
-                runestones[0][col]->change_color("empty");
+    if (std::count(col_bottom.begin(), col_bottom.end(), -1)==6) {
+        drop_timer->stop();
+        //qDebug() << "out";
+        return;
+    }
+    for (int col = 0; col < 6; col++) {
+        // 找最下面的空白珠
+        while(col_bottom[col] >= 0 && runestones[col_bottom[col]][col]->get_color() != "empty") {
+            col_bottom[col]--;
+        }
+        if (col_bottom[col] == -1) // 代表該 col 完全不用 drop
+            continue;
+        if (col_bottom[col] != 0) {// 如果是 0 就直接放新的隨機珠子就好了
+            for (int row = col_bottom[col]; row > 0; row--) {
+                runestones[row][col]->drop(runestones[row-1][col]->get_color());
             }
         }
-    //}
-
-    // 掉落動畫
+        runestones[0][col]->drop(random_runestone_color());
+    }
+    //qDebug() << col_bottom[0] << col_bottom[1] << col_bottom[2] << col_bottom[3] << col_bottom[4] << col_bottom[5];
 }
 
