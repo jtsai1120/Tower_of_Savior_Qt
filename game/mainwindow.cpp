@@ -29,12 +29,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     runestone_swap = false;
     runestone_drift = false;
     ms_elapsed = 0;
-    drift_timer = new QTimer;
+    drift_timer = new QTimer(this);
+    drift_timer->setInterval(1);
+    connect(drift_timer, &QTimer::timeout, [&]() {
+        ms_elapsed++;
+        update();
+    });
     drift_timer_started = false;
 
     hp = 2000;
 
-    light_halo_vfxs.resize(30);
     combo_cd = new QTimer;
     connect(combo_cd, SIGNAL(timeout()), this, SLOT(combo_eliminate()));
 
@@ -54,7 +58,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     if (runestone_drift) {
         qDebug() << ms_elapsed;
         if (ms_elapsed>=time_limit*1000) {
-            qDebug() << "reset ms timer";
             // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
             drift_timer->stop();
             drift_timer_started = false;
@@ -68,7 +71,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
             combo_count_and_drop(true);
         }
         // 依時間改變 cd_bar 長度
-        qDebug() << (ms_elapsed>=time_limit*1000);
         icon_bar->change_status("cd" , double(ms_elapsed)/double(time_limit*1000));
 
     }
@@ -111,6 +113,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
         if (runestone_drift) {
             // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
+            drift_timer->stop();
             drift_timer_started = false;
             runestone_drift = false;
             runestone_selected = false;
@@ -128,27 +131,22 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     if (runestone_selected) {
         runestone_swap = ((event->y()-510)/90!=selected_runestone.first || event->x()/90!=selected_runestone.second);
         if (runestone_swap) {
-            qDebug() << "swap";
+            //qDebug() << "swap";
             QSound::play(":/dataset/close_hi_hat.wav");
             QString tmp = runestones[(event->y()-510)/90][event->x()/90]->get_color();
             runestones[(event->y()-510)/90][event->x()/90]->change_color(runestones[selected_runestone.first][selected_runestone.second]->get_color());
             runestones[selected_runestone.first][selected_runestone.second]->change_color(tmp);
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
             selected_runestone = make_pair((event->y()-510)/90, event->x()/90); 
+            if (!drift_timer_started) { // 開始計時
+                ms_elapsed = 0; // 計時器 (經過多少 ms)
+                qDebug() << "start countdown";
+                runestone_drift = true;
+                drift_timer_started = true;
+                drift_timer->start();
+            }
         }
         runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
-        if (!drift_timer_started && runestone_swap) {
-            // 開始計時
-            drift_timer->start(1); // 每 1ms 觸發器
-            ms_elapsed = 0; // 計時器 (經過多少 ms)
-            connect(drift_timer, &QTimer::timeout, [&]() {
-                ms_elapsed++;
-                update();
-            });
-            qDebug() << "start countdown";
-            runestone_drift = true;
-            drift_timer_started = true;
-        }
     }
     if (runestone_drift) {
         // 使 Cursor 無法移動到畫面外導致 Crash
@@ -179,6 +177,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) {
         combo = 0;
         combo_count();
     } else {
+        for (int i = 0; i < cur_pair_num; i++) delete light_halo_vfxs[i];
+        light_halo_vfxs.clear();
         if (combo_counter.count(runestones).empty()) {
             qDebug() << "final combo : " << combo;
             combo_text->hide();
@@ -197,10 +197,6 @@ void MainWindow::combo_count() {
         return;
     }
     combo_text->show();
-    if (!light_halo_vfxs.empty()) {
-        for (auto i : light_halo_vfxs)
-            delete i;
-    }
     cur_pair_num = 0;
     combo_eliminate();
     combo_cd->start(390);
@@ -246,7 +242,7 @@ void MainWindow::combo_eliminate() {
     default:
         QSound::play(":/dataset/combo_sound/combo10.wav");
     }
-    light_halo_vfxs[cur_pair_num] = new Light_halo_vfx(this);
+    light_halo_vfxs.push_back(new Light_halo_vfx(this));
     light_halo_vfxs[cur_pair_num]->show(cur_pair);
     cur_pair_num++;
     combo++;
