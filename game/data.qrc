@@ -46,5 +46,15 @@
         <file>dataset/halo_vfx/heart_halo_pic.png</file>
         <file>dataset/halo_vfx/light_halo_pic.png</file>
         <file>dataset/halo_vfx/water_halo_pic.png</file>
+        <file>dataset/combo_sound/combo1.wav</file>
+        <file>dataset/combo_sound/combo2.wav</file>
+        <file>dataset/combo_sound/combo3.wav</file>
+        <file>dataset/combo_sound/combo4.wav</file>
+        <file>dataset/combo_sound/combo5.wav</file>
+        <file>dataset/combo_sound/combo6.wav</file>
+        <file>dataset/combo_sound/combo7.wav</file>
+        <file>dataset/combo_sound/combo8.wav</file>
+        <file>dataset/combo_sound/combo9.wav</file>
+        <file>dataset/combo_sound/combo10.wav</file>
     </qresource>
 </RCC>

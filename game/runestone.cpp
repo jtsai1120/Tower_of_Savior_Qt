@@ -1,7 +1,7 @@
 #include "runestone.h"
 #include <QDebug>
 
-Runestone::Runestone(QWidget *parent, int _row, int _col, int clr) {
+Runestone::Runestone(QWidget *parent, int _row, int _col, QString clr) {
     dark_stone_pic.load(":/dataset/runestone/dark_stone.png");
     earth_stone_pic.load(":/dataset/runestone/earth_stone.png");
     fire_stone_pic.load(":/dataset/runestone/fire_stone.png");
@@ -12,26 +12,7 @@ Runestone::Runestone(QWidget *parent, int _row, int _col, int clr) {
     runestone = new QLabel(parent);
     runestone->setFixedSize(dark_stone_pic.width(), dark_stone_pic.height());
     move(_row, _col);
-    switch(clr) {
-    case 0:
-        change_color("dark");
-        break;
-    case 1:
-        change_color("earth");
-        break;
-    case 2:
-        change_color("fire");
-        break;
-    case 3:
-        change_color("heart");
-        break;
-    case 4:
-        change_color("light");
-        break;
-    case 5:
-        change_color("water");
-        break;
-    }
+    change_color(clr);
     runestone->show();
 }
 

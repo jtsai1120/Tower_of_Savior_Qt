@@ -18,7 +18,8 @@ Light_halo_vfx::Light_halo_vfx(QWidget *parent) : mainwindow(parent) {
     connect(change_timer, SIGNAL(timeout()), this, SLOT(change()));
 }
 
-void Light_halo_vfx::show(Runestone_pair runestone_pair) {
+void Light_halo_vfx::show(Runestone_pair rp) {
+    runestone_pair = rp;
     halos.clear();
     clr = runestone_pair.color;
     for (pair<int,int> pii : runestone_pair.pair) {
@@ -42,18 +43,19 @@ void Light_halo_vfx::show(Runestone_pair runestone_pair) {
 }
 
 void Light_halo_vfx::change() {
-    const int changing_unit = 500;
+    const int changing_unit = 85;
     ms_elapsed++;
     if (ms_elapsed < changing_unit) {
-        // 把這邊也改成可以用 pii, 然後讓每次大小變一點，x, y 座標就也會變一點，以達成讓 Pixmap 保持在中心的效果。
-        for (QLabel *halo : halos) {
+        for (int i = 0; i < int(runestone_pair.pair.size()); i++) {
             double size = 90.0*double(ms_elapsed)/double(changing_unit);
-            halo->setFixedSize(size, size);
+            halos[i]->setFixedSize(size, size);
+            halos[i]->move(runestone_pair.pair[i].second*90 + (90-size)/2.0, 510+runestone_pair.pair[i].first*90 + (90-size)/2.0);
         }
     } else if (ms_elapsed < changing_unit*2) {
-        for (QLabel *halo : halos) {
+        for (int i = 0; i < int(runestone_pair.pair.size()); i++) {
             double size = 90.0*double(changing_unit*2-ms_elapsed)/double(changing_unit);
-            halo->setFixedSize(size, size);
+            halos[i]->setFixedSize(size, size);
+            halos[i]->move(runestone_pair.pair[i].second*90 + (90-size)/2.0, 510+runestone_pair.pair[i].first*90 + (90-size)/2.0);
         }
     } else {
         change_timer->stop();

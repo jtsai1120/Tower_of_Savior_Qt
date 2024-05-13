@@ -30,10 +30,16 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
 
-    void random_runestone();
+    QString random_runestone_color();
 
     Combo_counter combo_counter;
-    void combo_count();
+    void combo_count_and_drop();
+    //void combo_count();
+    void drop_detect();
+
+public slots:
+    void combo_eliminate();
+    void drop_trigger();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -44,6 +50,10 @@ protected:
 private:
     Bg *bg; // battle_bg, runestone_bg, battle_bgm
     Icon_bar *icon_bar; // cd_icon, hp_icon, cd_bar, hp_bar
+
+    long long seed;
+    mt19937 gen;
+    uniform_int_distribution<int> dist;
 
     vector<vector<Runestone*>> runestones;
 
@@ -59,11 +69,15 @@ private:
 
     int hp;
 
-    Light_halo_vfx *light_halo_vfx;
+    vector<Light_halo_vfx*> light_halo_vfxs;
 
     vector<Runestone_pair> combo_counter_result;
+    int combo;
     int cur_pair_num;
     QTimer *combo_cd;
+
+    vector<int> col_bottom;
+    QTimer *drop_timer;
 };
 
 #endif // MAINWINDOW_H

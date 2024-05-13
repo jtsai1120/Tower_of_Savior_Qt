@@ -1,4 +1,4 @@
-# Project Mario
+# Project TOS
     This is a C++ OOP project using Qt to build a Tower of Savior game.
 
 ### Course

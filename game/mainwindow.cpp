@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <QDebug>
 #include <QCursor>
+#include <algorithm>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setFixedSize(540, 960);
@@ -9,8 +10,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     bg = new Bg(this);
     icon_bar = new Icon_bar(this);
 
+    seed = chrono::system_clock::now().time_since_epoch().count();
+    gen.seed(seed);
+    dist = uniform_int_distribution<int>(0,5);
+
     runestones.resize(5, vector<Runestone*>(6));
-    random_runestone();
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 6; j++) {
+            delete runestones[i][j];
+            runestones[i][j] = new Runestone(this, i, j, random_runestone_color());
+        }
+    }
+    // 讓盤面先經過消珠直到不會有任3顆連線
 
     can_move_runestone = true;
     runestone_selected = false; // is cursor select a runestone ?
@@ -22,9 +33,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     hp = 2000;
 
-    light_halo_vfx = new Light_halo_vfx(this);
-
+    light_halo_vfxs.resize(30);
     combo_cd = new QTimer;
+    connect(combo_cd, SIGNAL(timeout()), this, SLOT(combo_eliminate()));
+
+    drop_timer = new QTimer;
+
 }
 
 void MainWindow::paintEvent(QPaintEvent *event) {
@@ -34,17 +48,23 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     }
 }
 
-void MainWindow::random_runestone() {
-    auto seed = chrono::system_clock::now().time_since_epoch().count();
-    mt19937 gen(seed);
-    uniform_int_distribution<int> dist(0, 5);
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 6; j++) {
-            delete runestones[i][j];
-            runestones[i][j] = new Runestone(this, i, j, dist(gen));
-        }
+QString MainWindow::random_runestone_color() {
+    switch(dist(gen)) {
+    case 0:
+        return "dark";
+    case 1:
+        return "earth";
+    case 2:
+        return "fire";
+    case 3:
+        return "heart";
+    case 4:
+        return "light";
+    case 5:
+        return "water";
     }
-    // 讓盤面先經過消珠直到不會有任3顆連線
+    // error
+    return "empty";
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
@@ -71,27 +91,9 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
             icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
             // 計算 Combo
-            combo_count();
+            combo_count_and_drop();
         }
     }
-}
-
-void MainWindow::combo_count() {
-    combo_counter_result = combo_counter.count(runestones);
-    qDebug() << "Combo:" << combo_counter_result.size();
-    cur_pair_num = 0;
-    connect(combo_cd, &QTimer::timeout, [&]{
-        qDebug() << cur_pair_num;
-        Runestone_pair cur_pair = combo_counter_result[cur_pair_num];
-        for (pair<int,int> pii : cur_pair.pair)
-            runestones[pii.first][pii.second]->change_color("empty");
-        //light_halo_vfx->show(cur_pair);
-        cur_pair_num++;
-        if (cur_pair_num == int(combo_counter_result.size())) {
-            combo_cd->stop();
-        }
-    });
-    combo_cd->start(500);
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
@@ -106,7 +108,8 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
         can_move_runestone = false;
         icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-        // 呼叫計算 Combo 的函數
+        // 計算 Combo
+        combo_count_and_drop();
     }
     if (runestone_selected) {
         runestone_swap = ((event->y()-510)/90!=selected_runestone.first || event->x()/90!=selected_runestone.second);
@@ -154,3 +157,97 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
         }
     }
 }
+
+void MainWindow::combo_count_and_drop() {
+    combo_counter_result = combo_counter.count(runestones);
+    combo = combo_counter_result.size();
+    if (!light_halo_vfxs.empty()) {
+        for (auto i : light_halo_vfxs)
+            delete i;
+        light_halo_vfxs.clear();
+    }
+    cur_pair_num = 0;
+    combo_eliminate();
+    combo_cd->start(390);
+}
+
+void MainWindow::combo_eliminate() {
+    if (cur_pair_num == combo) {
+        combo_cd->stop();
+        drop_detect();
+        return;
+    }
+    Runestone_pair cur_pair = combo_counter_result[cur_pair_num];
+    for (pair<int,int> pii : cur_pair.pair)
+        runestones[pii.first][pii.second]->change_color("empty");
+    switch (cur_pair_num) {
+    case 0:
+        QSound::play(":/dataset/combo_sound/combo1.wav");
+        break;
+    case 1:
+        QSound::play(":/dataset/combo_sound/combo2.wav");
+        break;
+    case 2:
+        QSound::play(":/dataset/combo_sound/combo3.wav");
+        break;
+    case 3:
+        QSound::play(":/dataset/combo_sound/combo4.wav");
+        break;
+    case 4:
+        QSound::play(":/dataset/combo_sound/combo5.wav");
+        break;
+    case 5:
+        QSound::play(":/dataset/combo_sound/combo6.wav");
+        break;
+    case 6:
+        QSound::play(":/dataset/combo_sound/combo7.wav");
+        break;
+    case 7:
+        QSound::play(":/dataset/combo_sound/combo8.wav");
+        break;
+    case 8:
+        QSound::play(":/dataset/combo_sound/combo9.wav");
+        break;
+    default:
+        QSound::play(":/dataset/combo_sound/combo10.wav");
+    }
+    light_halo_vfxs[cur_pair_num] = new Light_halo_vfx(this);
+    light_halo_vfxs[cur_pair_num]->show(cur_pair);
+    cur_pair_num++;
+}
+
+void MainWindow::drop_detect() {
+
+    col_bottom = vector<int>(6, 4);
+    connect(drop_timer, SIGNAL(timeout()), this, SLOT(drop_trigger()));
+    drop_timer->start(500);
+    // 寫偵測直到不可再掉落
+    drop_trigger();
+}
+
+void MainWindow::drop_trigger() {
+    //while(std::count(col_bottom.begin(), col_bottom.end(), -1)!=6) {
+
+        for (int col = 0; col < 6; col++) {
+            // 找最上面的空白珠
+            while(col_bottom[col] >= 0 && runestones[col_bottom[col]][col]->get_color() != "empty") {
+                qDebug() << "col: " << col << ", bottom = " << col_bottom[col] << ", color = " << runestones[col_bottom[col]][col]->get_color();
+                col_bottom[col]--;
+            }
+            if (col_bottom[col] == -1) // 代表該 col 完全不用 drop
+                continue;
+            qDebug() << "col: " << col << ", bottom = " << col_bottom[col] << ", empty";
+            if (col_bottom[col] != 0) {// 如果是 0 就直接放新的隨機珠子就好了
+                for (int row = col_bottom[col]; row > 0; row--) {
+                    qDebug() << "row " << row << "change to " << runestones[row-1][col]->get_color();
+                    runestones[row][col]->change_color(runestones[row-1][col]->get_color());
+                    qDebug() << runestones[row][col]->get_color() <<"finish";
+                }
+                runestones[0][col]->change_color("empty");
+            }
+        }
+    //}
+
+    // 掉落動畫
+}
+

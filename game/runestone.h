@@ -7,7 +7,7 @@ using namespace std;
 
 class Runestone {
 public:
-    Runestone(QWidget *parent, int _row, int _col, int clr);
+    Runestone(QWidget *parent, int _row, int _col, QString clr);
     ~Runestone();
 
     QString get_color() const { return color; }
