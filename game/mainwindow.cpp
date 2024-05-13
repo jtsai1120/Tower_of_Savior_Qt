@@ -52,8 +52,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 void MainWindow::paintEvent(QPaintEvent *event) {
     if (runestone_drift) {
+        qDebug() << ms_elapsed;
+        if (ms_elapsed>=time_limit*1000) {
+            qDebug() << "reset ms timer";
+            // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
+            drift_timer->stop();
+            drift_timer_started = false;
+            runestone_drift = false;
+            runestone_selected = false;
+            can_move_runestone = false;
+            icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
+            runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
+            // 計算 Combo
+            qDebug() << "call combo_count_and_drop (timeup)";
+            combo_count_and_drop(true);
+        }
         // 依時間改變 cd_bar 長度
-        icon_bar->change_status("cd" ,double(ms_elapsed)/double(time_limit*1000));
+        qDebug() << (ms_elapsed>=time_limit*1000);
+        icon_bar->change_status("cd" , double(ms_elapsed)/double(time_limit*1000));
+
     }
 }
 
@@ -101,28 +118,13 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
             icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
             // 計算 Combo
-            qDebug() << "call combo_count_and_drop way 1";
-            combo_count_and_drop();
+            qDebug() << "call combo_count_and_drop (mouseRelease)";
+            combo_count_and_drop(true);
         }
     }
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
-    if (ms_elapsed>=time_limit*1000) {
-        ms_elapsed = 0;
-        //qDebug() << "timeup";
-        // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
-        drift_timer->stop();
-        drift_timer_started = false;
-        runestone_drift = false;
-        runestone_selected = false;
-        can_move_runestone = false;
-        icon_bar->change_status("hp", 1.0-double(hp)/2000.0);
-        runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-        // 計算 Combo
-        qDebug() << "call combo_count_and_drop way 2";
-        combo_count_and_drop();
-    }
     if (runestone_selected) {
         runestone_swap = ((event->y()-510)/90!=selected_runestone.first || event->x()/90!=selected_runestone.second);
         if (runestone_swap) {
@@ -143,12 +145,11 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
                 ms_elapsed++;
                 update();
             });
-            //qDebug() << "start countdown";
+            qDebug() << "start countdown";
             runestone_drift = true;
             drift_timer_started = true;
         }
     }
-
     if (runestone_drift) {
         // 使 Cursor 無法移動到畫面外導致 Crash
         QRect windowRect = this->geometry();
@@ -174,9 +175,9 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
 void MainWindow::combo_count_and_drop(bool is_first_count) {
     if (is_first_count) {
         // Reset
+        qDebug() << "reset combo count";
         combo = 0;
         combo_count();
-        combo_text->show();
     } else {
         if (combo_counter.count(runestones).empty()) {
             qDebug() << "final combo : " << combo;
@@ -190,10 +191,15 @@ void MainWindow::combo_count_and_drop(bool is_first_count) {
 void MainWindow::combo_count() {
     combo_counter_result = combo_counter.count(runestones);
     cur_stage_combo = combo_counter_result.size();
+    if (cur_stage_combo == 0) {
+        qDebug() << "No Combo";
+        can_move_runestone = true;
+        return;
+    }
+    combo_text->show();
     if (!light_halo_vfxs.empty()) {
         for (auto i : light_halo_vfxs)
             delete i;
-        light_halo_vfxs.clear();
     }
     cur_pair_num = 0;
     combo_eliminate();
