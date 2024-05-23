@@ -11,7 +11,10 @@ CONFIG += c++11
 
 SOURCES += \
     bg.cpp \
+    charac_slot.cpp \
     combo_counter.cpp \
+    enemy.cpp \
+    enemy_hp.cpp \
     icon_bar.cpp \
     light_halo_vfx.cpp \
     main.cpp \
@@ -19,8 +22,12 @@ SOURCES += \
     runestone.cpp
 
 HEADERS += \
+    ButtonItem.h \
     bg.h \
+    charac_slot.h \
     combo_counter.h \
+    enemy.h \
+    enemy_hp.h \
     icon_bar.h \
     light_halo_vfx.h \
     mainwindow.h \

@@ -6,8 +6,12 @@
 
 class Icon_bar {
 public:
-    Icon_bar(QWidget *parent);
+    Icon_bar(QWidget *parent, double init_hp);
     void change_status(QString status, double prop);
+    QLabel *hp_text;
+    QLabel *heal_text;
+
+    double initial_hp;
 
 private:
     QPixmap cd_icon_pic;
@@ -21,7 +25,6 @@ private:
     double hp_bar_length;
 
     QString cur_status;
-
 };
 
 #endif // ICON_BAR_H

@@ -14,11 +14,13 @@ public:
     QString get_color() const { return color; }
 
     void move(int row, int col);
-    void change_color(QString clr);
+    void change_color(QString clr, int status);
 
     void drop(QString after_drop_change_clr, int drop_speed);
 
     void stick_cursor(int _x, int _y);
+
+    int status;
 
 private:
     QPixmap dark_stone_pic;
@@ -27,6 +29,21 @@ private:
     QPixmap heart_stone_pic;
     QPixmap light_stone_pic;
     QPixmap water_stone_pic;
+    QPixmap burn_dark_stone_pic;
+    QPixmap burn_earth_stone_pic;
+    QPixmap burn_fire_stone_pic;
+    QPixmap burn_heart_stone_pic;
+    QPixmap burn_light_stone_pic;
+    QPixmap burn_water_stone_pic;
+    QPixmap weathered_dark_stone_pic;
+    QPixmap weathered_earth_stone_pic;
+    QPixmap weathered_fire_stone_pic;
+    QPixmap weathered_heart_stone_pic;
+    QPixmap weathered_light_stone_pic;
+    QPixmap weathered_water_stone_pic;
+
+
+
     QLabel *runestone;
 
     QString color;
