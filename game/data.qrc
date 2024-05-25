@@ -59,5 +59,6 @@
         <file>dataset/ui/charac slot.jpg</file>
         <file>dataset/ui/start button.jpg</file>
         <file>dataset/ui/darken.png</file>
+        <file>dataset/ui/empty button.jpg</file>
     </qresource>
 </RCC>

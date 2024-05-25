@@ -37,7 +37,9 @@ Charac_slot::Charac_slot(QWidget *parent){
     attack_text->resize(200, 200);
 }
 
-void Charac_slot::change_charac(){
+void Charac_slot::change_charac(bool is_basic){
+    basic = is_basic;
+
     if (charac_ID + 1 < int(charac_pics.size()))
         charac_ID++;
     else
@@ -52,6 +54,7 @@ void Charac_slot::change_charac(){
     else if (charac_clr[charac_ID] == "light") attack_text->setStyleSheet("color: yellow");
     else if (charac_clr[charac_ID] == "dark") attack_text->setStyleSheet("color: purple");
     attack_text->setText(QString::number(charac_atk[charac_ID]));
+    if(basic)attack_text->setText("1");
     attack_text->show();
 }
 
@@ -60,7 +63,8 @@ void Charac_slot::add_attack(Runestone_pair rp){
     QString clr = rp.color;
 
     if (charac_clr[charac_ID] == clr){
-        attack += charac_atk[charac_ID]/10 * rp.pair.size();
+        if(basic) attack += rp.pair.size();
+        else attack += charac_atk[charac_ID] * rp.pair.size();
         if (rp.pair.size() > 5)
             all_atk = true;
         qDebug()<< "all_atk = "<<all_atk;

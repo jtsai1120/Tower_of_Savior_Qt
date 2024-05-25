@@ -17,7 +17,7 @@ public:
     Charac_slot(QWidget *parent);
     QLabel *charac_item;
 
-    void change_charac();
+    void change_charac(bool basic);
     int charac_ID = -1;
 
     void add_attack(Runestone_pair rp);
@@ -37,6 +37,7 @@ private:
     vector <QString> charac_clr;
     vector <int> charac_atk;
 
+    bool basic;
     bool all_atk = false; // 若消除一組>5顆，則攻擊為全體攻擊
 };
 

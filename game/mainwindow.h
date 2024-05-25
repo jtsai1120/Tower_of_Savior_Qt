@@ -57,7 +57,7 @@ protected:
 
 private:
     int game_status;
-    int attack_wait_count = 0; // 為了讓角色可以延遲攻擊
+    int attack_wait_count = -1; // 為了讓角色可以延遲攻擊
 
     Bg *bg; // battle_bg, runestone_bg, battle_bgm
     Icon_bar *icon_bar; // cd_icon, hp_icon, cd_bar, hp_bar
@@ -98,6 +98,10 @@ private:
     QPixmap start_button_pic;
     ButtonItem *start_button_item;
 
+    QPixmap ui_button_pic;
+    QLabel *ui_button;
+    bool basic = true;
+
     // characters
     vector<Charac_slot*> charac_slots;
 
@@ -114,6 +118,8 @@ private:
     // 燃燒位置
     vector<pair<int,int>> burning;
     vector<int> survive = {0,1,2};
+
+    QLabel *ui_text;
 
     const double init_hp = 2000;
     int hp;

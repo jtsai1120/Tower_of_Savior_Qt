@@ -29,6 +29,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     connect(start_button, SIGNAL(clicked()), this, SLOT(on_start_button_clicked()));
 
+    // add ui button
+    ui_button_pic.load(":/dataset/ui/empty button.jpg");
+    ui_button = new QLabel(this);
+    ui_button->setPixmap(ui_button_pic);
+    ui_button->setFixedWidth(180);
+    ui_button->setFixedHeight(83);
+    ui_button->move(10, 520);
+
+    ui_text = new QLabel(this);
+    QFont ui_text_font("Consolas", 20, QFont::Bold);
+    ui_text->setFont(ui_text_font);
+    ui_text->setStyleSheet("color: white");
+    ui_text->resize(200, 200);
+    ui_text->move(32, 461);
+    ui_text->show();
+    ui_text->setText("Mission 1");
 
     // 頂部角色設置欄位
     charac_slots.resize(6);
@@ -51,9 +67,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         enemy[i]->enemy_item->move(0,1000);
         enemy[i]->show(1,i);
         enemy_hp[i] = new Enemy_hp(this);
+        enemy_hp[i]->hp_bar->move(0,1000);
     }
-
-
 
     // 其他初始化
     seed = chrono::system_clock::now().time_since_epoch().count();
@@ -127,6 +142,10 @@ void MainWindow::on_start_button_clicked() {
         enemy_hp[i]->hp_bar->move(100 +  133*i, 330);
     }
 
+    ui_button->hide();
+    ui_text->hide();
+    ui_button->move(180, 250);
+    ui_text->move(190, 200);
 
     combo_text = new QLabel(this);
     QFont combo_text_font("Consolas", 35, QFont::Bold);
@@ -148,6 +167,12 @@ void MainWindow::on_start_button_clicked() {
             init_heal += charac_slots[i]->charac_heal[charac_slots[i]->charac_ID];
         }
     }
+
+    // 基礎模式則置成1
+    if (basic){
+        init_heal = 1;
+    }
+
     icon_bar->heal_text->hide();
     hp = init_hp;
     burn_road = false;
@@ -200,7 +225,22 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
     if (game_status == 0 && event->button() == Qt::LeftButton){
         // 更換角色
         if (event->y() >= 360 && event->y() <= 450) {
-            charac_slots[event->x() / 90] -> change_charac();
+            charac_slots[event->x() / 90] -> change_charac(basic);
+        }
+        // 更換任務
+        if (event->x() >= 10 && event->x() <= 190 && event->y() >= 520 && event->y() <= 603) {
+            if (basic){
+                basic = false;
+                ui_text->setText("Mission 2");
+            }
+            else{
+                basic = true;
+                ui_text->setText("Mission 1");
+            }
+            for (int i = 0; i < charac_slots.size(); i++)
+                if(charac_slots[i]->charac_ID != -1)
+                    for (int j = 0; j < 5; j++)
+                            charac_slots[i] -> change_charac(basic);
         }
 
         // 結算選擇的角色的 init_heal 總值
@@ -209,6 +249,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             if(charac_slots[i]->charac_ID != -1){
                 init_heal += charac_slots[i]->charac_heal[charac_slots[i]->charac_ID];
             }
+        }
+        // 基礎模式則置成1
+        if (basic){
+            init_heal = 1;
         }
         icon_bar->heal_text->setText("+" + QString::number(init_heal));
 
@@ -381,18 +425,45 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             darken->raise();
 
             // 我方攻擊階段
-            hp += heal;
-            if (hp > init_hp) hp = init_hp;
             game_status = 2;
-            combo_cd->start(190);
+            combo_cd->start(150);
 
         } else combo_count();
     } else if (game_status == 2){ // 輪流攻擊
-        if (attack_wait_count > 5){
-            game_status = 3;
-            combo_count_and_drop(false); // 交給下個階段的自己
+        if (attack_wait_count > 5){ // 進入下個wave
+            if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead && attack_wait_count == 6){
+                ui_button->show();
+                ui_text->show();
+                ui_text->setText("Wave 0" + QString::number(level + 1) + "/ 03");
+                if (level == 3){ // 結束了
+                    ui_text->setText("  VICTORY!");
+                }
+                combo_cd->start(800);
+                attack_wait_count++;
+                for (int i = 0; i < 3; i++){
+                    enemy[i]->enemy_item->hide();
+                }
+            }
+            else{
+                game_status = 3;
+                combo_count_and_drop(false); // 交給下個階段的自己
+            }
             return;
         }
+        if (attack_wait_count == -1){ // 不攻擊，乘上combo數
+            attack_wait_count ++;
+            for(int i = 0; i < charac_slots.size(); i++){
+                if (charac_slots[i]->attack == 0) continue;
+                charac_slots[i]->attack *= combo;
+                charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
+            }
+            heal *= combo;
+            icon_bar->heal_text->setText("+" + QString::number(heal));
+
+            combo_cd->start(90);
+            return;
+        }
+
         // 根據 attack_wait_count 輪流攻擊
         if (charac_slots[attack_wait_count]->charac_ID == -1) {
             attack_wait_count ++;
@@ -461,12 +532,11 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                damage = charac_slots[attack_wait_count]->attack;
             }
             qDebug()<<damage;
-            enemy[attack_enemy]->hp = enemy[attack_enemy]->hp- damage;
+            enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
             enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
             if ((enemy[attack_enemy]->hp) <= 0){
                 enemy[attack_enemy]->dead = true;
-                enemy[attack_enemy]->enemy_item->move(0,1000);
                 enemy_hp[attack_enemy]->hp_bar->move(0,1000);
                 if (survive.size() > 0)
                     survive.erase(remove(survive.begin(), survive.end(), attack_enemy), survive.end());
@@ -484,15 +554,23 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             qDebug()<<"after"<<enemy[attack_enemy]->hp;
 
         }
+
         charac_slots[attack_wait_count]->new_round();
         attack_wait_count ++;
+
         combo_cd->start(190);
+    } else if (game_status == 3){ // 結算準備下一局
+        attack_wait_count = -1;
+        burn_road = false;
 
         if (level == 1 || level == 2){ //敵人全滅
             if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead){
                 level++;
+                ui_button->hide();
+                ui_text->hide();
                 if (level == 2){
                     for (int i = 0; i < 3; i++){
+                        enemy[i]->enemy_item->show();
                         enemy[i]->show(2,i);
                         enemy[i]->enemy_item->move(85 +  130*i, 200);
                         enemy_hp[i]->reset(2,i);
@@ -503,6 +581,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     }
                 }
                 if (level == 3){
+                    enemy[0]->enemy_item->show();
                     enemy[0]->show(3,0);
                     enemy[0]->enemy_item->move(142, 50);
                     enemy[1]->enemy_item->move(0, 1000);
@@ -515,14 +594,11 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
         }
 
-
-    } else if (game_status == 3){ // 結算準備下一局
-        attack_wait_count = 0;
-        burn_road = false;
-
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd > 0)
                 enemy[i]->cd--;
+            if ((enemy[i]->dead) == true)
+                enemy[i]->enemy_item->move(0,1000); //將死亡敵人移除
         }
 
         // 敵人的攻擊
@@ -568,6 +644,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
 
 
         // 畫面亮回，準備下一局
+        hp += heal;
+        if (hp > init_hp) hp = init_hp;
         darken->move(0, 1000);
         heal = 0;
         harm = 0;
