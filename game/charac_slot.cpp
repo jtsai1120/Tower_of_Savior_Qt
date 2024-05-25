@@ -23,7 +23,7 @@ Charac_slot::Charac_slot(QWidget *parent){
     charac_heal = {20, 2, 15, 11, 8};
 
     charac_pics.resize(paths.size());
-    for (int i = 0; i < paths.size(); i++){
+    for (int i = 0; i < int(paths.size()); i++){
         charac_pics[i].load(paths[i]);
     }
 

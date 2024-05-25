@@ -92,9 +92,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     combo_cd = new QTimer;
     connect(combo_cd, SIGNAL(timeout()), this, SLOT(combo_eliminate()));
 
-    drop_timer = new QTimer;
-    connect(drop_timer, SIGNAL(timeout()), this, SLOT(drop_trigger()));
-
     icon_bar->heal_text->show();
     icon_bar->heal_text->setText("+" + QString::number(init_heal));
 
@@ -237,7 +234,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                 basic = true;
                 ui_text->setText("Mission 1");
             }
-            for (int i = 0; i < charac_slots.size(); i++)
+            for (int i = 0; i < int(charac_slots.size()); i++)
                 if(charac_slots[i]->charac_ID != -1)
                     for (int j = 0; j < 5; j++)
                             charac_slots[i] -> change_charac(basic);
@@ -452,7 +449,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
         if (attack_wait_count == -1){ // 不攻擊，乘上combo數
             attack_wait_count ++;
-            for(int i = 0; i < charac_slots.size(); i++){
+            for(int i = 0; i < int(charac_slots.size()); i++){
                 if (charac_slots[i]->attack == 0) continue;
                 charac_slots[i]->attack *= combo;
                 charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
@@ -770,40 +767,56 @@ void MainWindow::combo_eliminate() {
 }
 
 void MainWindow::drop_detect() {
+    tmp_runestones = vector<vector<Runestone*>>(10, vector<Runestone*>(6, nullptr));
+    result_colors = vector<vector<QString>>(5, vector<QString>(6, "empty"));
     col_bottom = vector<int>(6, 4);
-    drop_interval = 187;
-    drop_timer->start(drop_interval);
-    drop_trigger();
-}
-
-void MainWindow::drop_trigger() {
-    drop_timer->stop();
-    if (std::count(col_bottom.begin(), col_bottom.end(), -1)==6) {
-        for (int i = 0; i < 5; i++)
-            for (int j = 0; j < 6; j++)
-                runestones[i][j]->move(i, j);
-        combo_count_and_drop(false); // count combo and drop again
-        return;
-    }
     for (int col = 0; col < 6; col++) {
         // 找最下面的空白珠
         while(col_bottom[col] >= 0 && runestones[col_bottom[col]][col]->get_color() != "empty") {
+            result_colors[col_bottom[col]][col] = runestones[col_bottom[col]][col]->get_color();
             col_bottom[col]--;
         }
-        if (col_bottom[col] == -1) // 代表該 col 完全不用 drop
-            continue;
-        if (col_bottom[col] != 0) {// 如果是 0 就直接放新的隨機珠子就好了
-            for (int row = col_bottom[col]; row > 0; row--) {
-                if (runestones[row-1][col]->status == 2){ // 風化符石跟著掉落
-                    runestones[row-1][col]->status = 0;
-                    runestones[row][col]->status = 2;
-                }
-                runestones[row][col]->drop(runestones[row-1][col]->get_color(), drop_interval);
+        int count_empty = (col_bottom[col]>=0)? 1:0;
+        for (int row = col_bottom[col] - 1; row >= 0; row--) {
+            if (runestones[row][col]->get_color()!="empty") {
+                tmp_runestones[row+5][col] = new Runestone(this, row, col, runestones[row][col]->get_color());
+                runestones[row][col]->change_color("empty", 0);
+            } else count_empty++;
+        }
+        while(count_empty > 0) {
+            tmp_runestones[5-count_empty][col] = new Runestone(this, -1*count_empty, col, random_runestone_color());
+            count_empty--;
+        }
+    }
+
+    int max_wait_time = 0;
+
+    for (int col = 0; col < 6; col++) {
+        if (col_bottom[col]==-1) continue;
+        for (int row = col_bottom[col]+5; row >= 0; row--) {
+            if (tmp_runestones[row][col]==nullptr || tmp_runestones[row][col]->get_color()=="empty" || row == col_bottom[col]+5) {
+                continue;
+            }
+            if (col_bottom[col]==-1) continue;
+            tmp_runestones[row][col]->drop(row-5, col_bottom[col]);
+            result_colors[col_bottom[col]][col] = tmp_runestones[row][col]->get_color();
+            max_wait_time = std::max(max_wait_time, (col_bottom[col]+5-row));
+            col_bottom[col]--;
+        }
+    }
+    QTimer::singleShot((max_wait_time+1)*105, [&](){
+        for (auto &row : tmp_runestones) {
+            for (auto &i : row) {
+                delete i;
             }
         }
-        runestones[0][col]->drop(random_runestone_color(), drop_interval);
-    }
-    drop_interval -= drop_acceleration;
-    drop_timer->start(drop_interval);
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 6; j++) {
+                runestones[i][j]->change_color(result_colors[i][j], 0);
+            }
+        }
+        result_colors.clear();
+        combo_count_and_drop(false); // count combo and drop again
+        return;
+    });
 }
-

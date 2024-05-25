@@ -46,7 +46,6 @@ public:
 
 public slots:
     void combo_eliminate();
-    void drop_trigger();
     void on_start_button_clicked();
 
 protected:
@@ -87,11 +86,11 @@ private:
     QTimer *combo_cd;
 
     vector<int> col_bottom;
-    QTimer *drop_timer;
-    int drop_interval;
-    const int drop_acceleration = 19;
 
     QLabel *combo_text;
+
+    vector<vector<Runestone*>> tmp_runestones;
+    vector<vector<QString>> result_colors;
 
     // start btn
     QPushButton *start_button = new QPushButton;
