@@ -401,31 +401,33 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
     } else if (game_status == 1){ // 準備攻擊及回血
         for (int i = 0; i < cur_pair_num; i++) delete light_halo_vfxs[i];
         light_halo_vfxs.clear();
-        if (combo_counter.count(runestones).empty()) {
-            qDebug() << "final combo : " << combo;
-            combo_text->hide();
-            can_move_runestone = true;
+        QTimer::singleShot(105, [&](){
+            if (combo_counter.count(runestones).empty()) {
+                qDebug() << "final combo : " << combo;
+                combo_text->hide();
+                can_move_runestone = true;
 
-            // 關閉燃燒路徑的位置
-            for (int i = 0; i < int(runestones.size()); i++){
-                for (int j = 0; j < int(runestones[i].size()); j++){
-                    if (runestones[i][j]->status == 1) runestones[i][j]->change_color(runestones[i][j]->get_color(), 0);
+                // 關閉燃燒路徑的位置
+                for (int i = 0; i < int(runestones.size()); i++){
+                    for (int j = 0; j < int(runestones[i].size()); j++){
+                        if (runestones[i][j]->status == 1) runestones[i][j]->change_color(runestones[i][j]->get_color(), 0);
+                    }
                 }
-            }
-            // 還原本來就有燃燒的位置
-            for (int i = 0; i < int(burning.size()); i++){
-                runestones[burning[i].first][burning[i].second]->change_color(runestones[burning[i].first][burning[i].second]->get_color(), 1);
-            }
+                // 還原本來就有燃燒的位置
+                for (int i = 0; i < int(burning.size()); i++){
+                    runestones[burning[i].first][burning[i].second]->change_color(runestones[burning[i].first][burning[i].second]->get_color(), 1);
+                }
 
-            // 暗下畫面
-            darken->move(0, 510);
-            darken->raise();
+                // 暗下畫面
+                darken->move(0, 510);
+                darken->raise();
 
-            // 我方攻擊階段
-            game_status = 2;
-            combo_cd->start(150);
+                // 我方攻擊階段
+                game_status = 2;
+                combo_cd->start(150);
 
-        } else combo_count();
+            } else combo_count();
+        });
     } else if (game_status == 2){ // 輪流攻擊
         if (attack_wait_count > 5){ // 進入下個wave
             if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead && attack_wait_count == 6){
