@@ -56,5 +56,9 @@
         <file>dataset/combo_sound/combo8.wav</file>
         <file>dataset/combo_sound/combo9.wav</file>
         <file>dataset/combo_sound/combo10.wav</file>
+        <file>dataset/ui/charac slot.jpg</file>
+        <file>dataset/ui/start button.jpg</file>
+        <file>dataset/ui/darken.png</file>
+        <file>dataset/ui/empty button.jpg</file>
     </qresource>
 </RCC>

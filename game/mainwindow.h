@@ -16,12 +16,17 @@
 #include <vector>
 #include <random>
 #include <chrono>
+
+#include "ButtonItem.h"
+#include "charac_slot.h"
 #include "bg.h"
 #include "icon_bar.h"
 #include "runestone.h"
 #include "runestone_pair.h"
 #include "combo_counter.h"
 #include "light_halo_vfx.h"
+#include "enemy.h"
+#include "enemy_hp.h"
 using namespace std;
 
 class MainWindow : public QMainWindow {
@@ -37,9 +42,11 @@ public:
     void combo_count();
     void drop_detect();
 
+    int level = 1;
+
 public slots:
     void combo_eliminate();
-    void drop_trigger();
+    void on_start_button_clicked();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -48,6 +55,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
 
 private:
+    int game_status;
+    int attack_wait_count = -1; // 為了讓角色可以延遲攻擊
+
     Bg *bg; // battle_bg, runestone_bg, battle_bgm
     Icon_bar *icon_bar; // cd_icon, hp_icon, cd_bar, hp_bar
 
@@ -67,7 +77,6 @@ private:
     int ms_elapsed;
     const int time_limit = 10;
 
-    int hp;
 
     vector<Light_halo_vfx*> light_halo_vfxs;
 
@@ -77,11 +86,48 @@ private:
     QTimer *combo_cd;
 
     vector<int> col_bottom;
-    QTimer *drop_timer;
-    int drop_interval;
-    const int drop_acceleration = 19;
 
     QLabel *combo_text;
+
+    vector<vector<Runestone*>> tmp_runestones;
+    vector<vector<QString>> result_colors;
+
+    // start btn
+    QPushButton *start_button = new QPushButton;
+    QPixmap start_button_pic;
+    ButtonItem *start_button_item;
+
+    QPixmap ui_button_pic;
+    QLabel *ui_button;
+    bool basic = true;
+
+    // characters
+    vector<Charac_slot*> charac_slots;
+
+    //enemies
+    vector<Enemy*> enemy;
+
+    //enemy_hp
+    vector<Enemy_hp*> enemy_hp;
+
+    // darken
+    QPixmap darken_pic;
+    QLabel *darken;
+
+    // 燃燒位置
+    vector<pair<int,int>> burning;
+    vector<int> survive = {0,1,2};
+
+    QLabel *ui_text;
+
+    const double init_hp = 2000;
+    int hp;
+    int heal = 0; // 回復量
+    int init_heal = 0; // 初始回復量
+    int harm; // 所受傷害
+    bool burn_road; // 燃燒軌跡技能生效
+    int attack_enemy;
+    int damage;
 };
 
 #endif // MAINWINDOW_H
