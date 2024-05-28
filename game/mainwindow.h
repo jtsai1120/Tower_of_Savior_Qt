@@ -120,14 +120,14 @@ private:
 
     QLabel *ui_text;
 
-    const double init_hp = 2000;
+    double init_hp = 2000;
     int hp;
     int heal = 0; // 回復量
     int init_heal = 0; // 初始回復量
     int harm; // 所受傷害
     bool burn_road; // 燃燒軌跡技能生效
     int attack_enemy;
-    int damage;
+    double damage;
 };
 
 #endif // MAINWINDOW_H

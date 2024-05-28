@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     ui_button->move(10, 520);
 
     ui_text = new QLabel(this);
-    QFont ui_text_font("Consolas", 20, QFont::Bold);
+    QFont ui_text_font("Consolas", 14, QFont::Bold);
     ui_text->setFont(ui_text_font);
     ui_text->setStyleSheet("color: white");
     ui_text->resize(200, 200);
@@ -154,20 +154,23 @@ void MainWindow::on_start_button_clicked() {
 
     // 清除空的隊伍欄位
     init_heal = 0;
+    init_hp = 0;
     harm = 0;
     for (int i = 0; i < 6; i++) {
         if(charac_slots[i]->charac_ID == -1)
             charac_slots[i]->charac_item->move(0, 1000); // 只是移出螢幕
         else {
             charac_slots[i]->attack_text->hide();
-            // 結算選擇的角色的 init_heal 總值
+            // 結算選擇的角色的 init_heal、init_hp 總值
             init_heal += charac_slots[i]->charac_heal[charac_slots[i]->charac_ID];
+            init_hp += charac_slots[i]->charac_hp[charac_slots[i]->charac_ID];
         }
     }
 
     // 基礎模式則置成1
     if (basic){
-        init_heal = 1;
+        init_heal = 5;
+        init_hp = 2000;
     }
 
     icon_bar->heal_text->hide();
@@ -240,18 +243,22 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                             charac_slots[i] -> change_charac(basic);
         }
 
-        // 結算選擇的角色的 init_heal 總值
+        // 結算選擇的角色的 init_heal、hp 總值
         init_heal = 0;
+        init_hp = 0;
         for (int i = 0; i < 6; i++) {
             if(charac_slots[i]->charac_ID != -1){
                 init_heal += charac_slots[i]->charac_heal[charac_slots[i]->charac_ID];
+                init_hp += charac_slots[i]->charac_hp[charac_slots[i]->charac_ID];
             }
         }
-        // 基礎模式則置成1
+        // 基礎模式則置成1、2000
         if (basic){
-            init_heal = 1;
+            init_heal = 5;
+            init_hp = 2000;
         }
         icon_bar->heal_text->setText("+" + QString::number(init_heal));
+        icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
 
         return;
     }
@@ -450,6 +457,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             return;
         }
         if (attack_wait_count == -1){ // 不攻擊，乘上combo數
+            if (!basic) combo *= 0.5;
             attack_wait_count ++;
             for(int i = 0; i < int(charac_slots.size()); i++){
                 if (charac_slots[i]->attack == 0) continue;
@@ -530,6 +538,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             else {
                damage = charac_slots[attack_wait_count]->attack;
             }
+
+            if (!basic) damage *= 0.01;
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
@@ -561,6 +571,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
     } else if (game_status == 3){ // 結算準備下一局
         attack_wait_count = -1;
         burn_road = false;
+
+        hp += heal;
+        if (hp > init_hp) hp = init_hp;
 
         if (level == 1 || level == 2){ //敵人全滅
             if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead){
@@ -596,23 +609,29 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd > 0)
                 enemy[i]->cd--;
+            if (enemy[i]->cd > 0 && !basic)
+                enemy[i]->cd--;
             if ((enemy[i]->dead) == true)
                 enemy[i]->enemy_item->move(0,1000); //將死亡敵人移除
         }
+
+        // 受傷倍率
+        int magnify = 1;
+        if (!basic) magnify = 6;
 
         // 敵人的攻擊
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd == 0){
                 if (level == 1){
                     if (enemy[i]->dead == false){
-                        hp = hp - enemy[i]->attack;
+                        hp = hp - enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd_reset(level);
                     }
                 }
                 if (level == 2){
                     if (enemy[i]->dead == false){
-                        hp = hp - enemy[i]->attack;
+                        hp = hp - enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd_reset(level);
                     }
@@ -622,29 +641,27 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
         if (level == 3){
             if (enemy[0]->dead == false && enemy[0]->cd == 0){
-                hp = hp - enemy[0]->attack;
+                hp = hp - enemy[0]->attack * magnify;
                 qDebug()<<"enemy attack!";
                 enemy[0]->cd_reset(level);
             }
         }
         // 風化指定符石位置
-        runestones[2][2]->change_color(runestones[2][2]->get_color(), 2);
+        //runestones[2][2]->change_color(runestones[2][2]->get_color(), 2);
 
         // 燃燒指定位置
-        burning.push_back({0, 0});
-        burning.push_back({1, 2});
+        //burning.push_back({0, 0});
+        //burning.push_back({1, 2});
 
         // 顯示燃燒位置
-        runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
-        runestones[1][2]->change_color(runestones[1][2]->get_color(), 1);
+        //runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+        //runestones[1][2]->change_color(runestones[1][2]->get_color(), 1);
 
         // 啟動燃燒軌跡
-        burn_road = true;
+        //burn_road = true;
 
 
         // 畫面亮回，準備下一局
-        hp += heal;
-        if (hp > init_hp) hp = init_hp;
         darken->move(0, 1000);
         heal = 0;
         harm = 0;

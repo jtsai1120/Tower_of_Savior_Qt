@@ -48,7 +48,7 @@ public:
 
 private:
 
-
+    bool basic = true;
     bool all_atk = false; // 若消除一組>5顆，則攻擊為全體攻擊
 };
 

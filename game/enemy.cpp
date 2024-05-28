@@ -28,7 +28,7 @@ Enemy::Enemy(QWidget *parent){
 
 }
 
-void Enemy::show(int level,int enemy_photo){ //level starts from 1
+void Enemy::show(int level, int enemy_photo){ //level starts from 1
     if (level == 1){
         if (enemy_photo == 0)
             enemy_item->setPixmap(water1);
@@ -51,6 +51,7 @@ void Enemy::show(int level,int enemy_photo){ //level starts from 1
             enemy_item->setPixmap(fire3);
         }
     }
+
     hp = hp_list[level-1][enemy_photo];
     attack = attack_list[level-1][enemy_photo];
     cd = cd_list[level-1];

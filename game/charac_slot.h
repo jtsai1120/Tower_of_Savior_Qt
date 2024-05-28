@@ -24,7 +24,7 @@ public:
     void new_round();
 
     vector <int> charac_heal;
-    //vector <int> charac_hp;
+    vector <int> charac_hp;
 
     QLabel *attack_text;
     int attack = 0;
