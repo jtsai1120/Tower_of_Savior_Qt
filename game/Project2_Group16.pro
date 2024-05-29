@@ -11,6 +11,7 @@ CONFIG += c++11
 
 SOURCES += \
     bg.cpp \
+    bullet.cpp \
     charac_slot.cpp \
     combo_counter.cpp \
     enemy.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     ButtonItem.h \
     bg.h \
+    bullet.h \
     charac_slot.h \
     combo_counter.h \
     enemy.h \

@@ -27,6 +27,7 @@
 #include "light_halo_vfx.h"
 #include "enemy.h"
 #include "enemy_hp.h"
+#include "bullet.h"
 using namespace std;
 
 class MainWindow : public QMainWindow {

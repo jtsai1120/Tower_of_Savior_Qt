@@ -515,6 +515,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
             damage = 0;
             qDebug()<<"before"<<enemy[attack_enemy]->hp;
+
             if (charac_slots[attack_wait_count]->attribute == "water" && enemy[attack_enemy]->enemy_clr == "fire"){
                     damage = 2*charac_slots[attack_wait_count]->attack;
                     qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
@@ -557,7 +558,10 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             else {
                damage = charac_slots[attack_wait_count]->attack;
             }
-
+            //QPoint startpoint(charac_slots[attack_wait_count]->charac_item->x(),charac_slots[attack_wait_count]->charac_item->y());
+            //QPoint endpoint(enemy[attack_enemy]->enemy_item->x(),enemy[attack_enemy]->enemy_item->y());
+            //Bullet shot(startpoint,endpoint);
+            //shot.show();
             if (!basic) damage *= 0.01;
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
