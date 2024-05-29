@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <random>
+#include <QFontDatabase>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -38,13 +39,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     ui_button->move(10, 520);
 
     ui_text = new QLabel(this);
-    QFont ui_text_font("Consolas", 20, QFont::Bold);
+    QFont ui_text_font("Consolas", 14, QFont::Bold);
     ui_text->setFont(ui_text_font);
     ui_text->setStyleSheet("color: white");
     ui_text->resize(200, 200);
     ui_text->move(32, 461);
     ui_text->show();
     ui_text->setText("Mission 1");
+
+    gameover_text = new QLabel(this);
+    QFontDatabase::addApplicationFont(":/dataset/Survival Instinx");
+    QFont gameover_text_font("Survival Instinx", 50, QFont::Bold);
+    gameover_text->setFont(gameover_text_font);
+    gameover_text->setStyleSheet("color: red");
+    gameover_text->resize(1000, 1000);
+    gameover_text->move(50, -250);
+    gameover_text->setText("Game Over");
+    gameover_text->hide();
 
     // 頂部角色設置欄位
     charac_slots.resize(6);
@@ -67,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         enemy[i]->enemy_item->move(0,1000);
         enemy[i]->show(1,i);
         enemy_hp[i] = new Enemy_hp(this);
+        enemy_hp[i]->changeImageColor(1,i);
         enemy_hp[i]->hp_bar->move(0,1000);
     }
 
@@ -154,20 +166,23 @@ void MainWindow::on_start_button_clicked() {
 
     // 清除空的隊伍欄位
     init_heal = 0;
+    init_hp = 0;
     harm = 0;
     for (int i = 0; i < 6; i++) {
         if(charac_slots[i]->charac_ID == -1)
             charac_slots[i]->charac_item->move(0, 1000); // 只是移出螢幕
         else {
             charac_slots[i]->attack_text->hide();
-            // 結算選擇的角色的 init_heal 總值
+            // 結算選擇的角色的 init_heal、init_hp 總值
             init_heal += charac_slots[i]->charac_heal[charac_slots[i]->charac_ID];
+            init_hp += charac_slots[i]->charac_hp[charac_slots[i]->charac_ID];
         }
     }
 
     // 基礎模式則置成1
     if (basic){
-        init_heal = 1;
+        init_heal = 5;
+        init_hp = 2000;
     }
 
     icon_bar->heal_text->hide();
@@ -240,18 +255,22 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                             charac_slots[i] -> change_charac(basic);
         }
 
-        // 結算選擇的角色的 init_heal 總值
+        // 結算選擇的角色的 init_heal、hp 總值
         init_heal = 0;
+        init_hp = 0;
         for (int i = 0; i < 6; i++) {
             if(charac_slots[i]->charac_ID != -1){
                 init_heal += charac_slots[i]->charac_heal[charac_slots[i]->charac_ID];
+                init_hp += charac_slots[i]->charac_hp[charac_slots[i]->charac_ID];
             }
         }
-        // 基礎模式則置成1
+        // 基礎模式則置成1、2000
         if (basic){
-            init_heal = 1;
+            init_heal = 5;
+            init_hp = 2000;
         }
         icon_bar->heal_text->setText("+" + QString::number(init_heal));
+        icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
 
         return;
     }
@@ -312,6 +331,9 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
                 icon_bar->heal_text->show();
                 icon_bar->heal_text->setText("-" + QString::number(harm));
                 burned = true;
+                if (hp <= 0){
+                    game_over();
+                }
             }
             if (runestones[selected_runestone.first][selected_runestone.second]->status == 1){
                 burned_before = true;
@@ -323,6 +345,10 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
                 icon_bar->heal_text->setStyleSheet("color: red");
                 icon_bar->heal_text->show();
                 icon_bar->heal_text->setText("-" + QString::number(harm));
+
+                if (hp <= 0){
+                    game_over();
+                }
 
                 runestones[(event->y()-510)/90][event->x()/90]->change_color(runestones[selected_runestone.first][selected_runestone.second]->get_color(), 0);
                 runestones[selected_runestone.first][selected_runestone.second]->change_color(tmp, 0);
@@ -450,6 +476,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             return;
         }
         if (attack_wait_count == -1){ // 不攻擊，乘上combo數
+            if (!basic) combo *= 0.5;
             attack_wait_count ++;
             for(int i = 0; i < int(charac_slots.size()); i++){
                 if (charac_slots[i]->attack == 0) continue;
@@ -530,6 +557,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             else {
                damage = charac_slots[attack_wait_count]->attack;
             }
+
+            if (!basic) damage *= 0.01;
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
@@ -562,6 +591,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         attack_wait_count = -1;
         burn_road = false;
 
+        hp += heal;
+        if (hp > init_hp) hp = init_hp;
+
         if (level == 1 || level == 2){ //敵人全滅
             if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead){
                 level++;
@@ -573,6 +605,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         enemy[i]->show(2,i);
                         enemy[i]->enemy_item->move(85 +  130*i, 200);
                         enemy_hp[i]->reset(2,i);
+                        enemy_hp[i]->changeImageColor(2,i);
                         enemy_hp[i]->hp_bar->move(100 +  133*i, 330);
                         survive.push_back(0);
                         survive.push_back(1);
@@ -586,6 +619,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     enemy[1]->enemy_item->move(0, 1000);
                     enemy[2]->enemy_item->move(0, 1000);
                     enemy_hp[0]->reset(3,0);
+                    enemy_hp[0]->changeImageColor(3,0);
                     enemy_hp[0]->hp_bar->move(140, 330);
                     survive.push_back(0);
                 }
@@ -596,23 +630,29 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd > 0)
                 enemy[i]->cd--;
+            if (enemy[i]->cd > 0 && !basic)
+                enemy[i]->cd--;
             if ((enemy[i]->dead) == true)
                 enemy[i]->enemy_item->move(0,1000); //將死亡敵人移除
         }
+
+        // 受傷倍率
+        int magnify = 1;
+        if (!basic) magnify = 6;
 
         // 敵人的攻擊
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd == 0){
                 if (level == 1){
                     if (enemy[i]->dead == false){
-                        hp = hp - enemy[i]->attack;
+                        hp = hp - enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd_reset(level);
                     }
                 }
                 if (level == 2){
                     if (enemy[i]->dead == false){
-                        hp = hp - enemy[i]->attack;
+                        hp = hp - enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd_reset(level);
                     }
@@ -622,40 +662,42 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
         if (level == 3){
             if (enemy[0]->dead == false && enemy[0]->cd == 0){
-                hp = hp - enemy[0]->attack;
+                hp = hp - enemy[0]->attack * magnify;
                 qDebug()<<"enemy attack!";
                 enemy[0]->cd_reset(level);
             }
         }
+        if (hp <= 0 ){
+            game_over();
+        }
         // 風化指定符石位置
-        runestones[2][2]->change_color(runestones[2][2]->get_color(), 2);
+        //runestones[2][2]->change_color(runestones[2][2]->get_color(), 2);
 
         // 燃燒指定位置
-        burning.push_back({0, 0});
-        burning.push_back({1, 2});
+        //burning.push_back({0, 0});
+        //burning.push_back({1, 2});
 
         // 顯示燃燒位置
-        runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
-        runestones[1][2]->change_color(runestones[1][2]->get_color(), 1);
+        //runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+        //runestones[1][2]->change_color(runestones[1][2]->get_color(), 1);
 
         // 啟動燃燒軌跡
-        burn_road = true;
+        //burn_road = true;
 
+        if (game_status != 5){ //gameover
+            // 畫面亮回，準備下一局
+            darken->move(0, 1000);
+            heal = 0;
+            harm = 0;
+            icon_bar->heal_text->hide();
 
-        // 畫面亮回，準備下一局
-        hp += heal;
-        if (hp > init_hp) hp = init_hp;
-        darken->move(0, 1000);
-        heal = 0;
-        harm = 0;
-        icon_bar->heal_text->hide();
-
-        // 更新血條
-        icon_bar->change_status("hp", 1.0 - hp/init_hp);
-        icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
-        game_status = 1; // 開始下一局
-        can_move_runestone = true;
-        return;
+            // 更新血條
+            icon_bar->change_status("hp", 1.0 - hp/init_hp);
+            icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
+            game_status = 1; // 開始下一局
+            can_move_runestone = true;
+            return;
+        }
     }
 }
 
@@ -821,4 +863,23 @@ void MainWindow::drop_detect() {
         combo_count_and_drop(false); // count combo and drop again
         return;
     });
+}
+
+void MainWindow::game_over(){
+    darken->move(0, 0);
+    darken->raise();
+    game_status = 5;
+    for (int i = 0; i<runestones.size(); i++){
+        for (int j=0;j<runestones[i].size();j++){
+            runestones[i][j]->game_over_drop();
+        }
+    }
+    for (int i = 0; i < 3; i++){
+        enemy[i]->enemy_item->move(0,1000);
+        enemy_hp[i]->hp_bar->move(0,1000);
+    }
+    icon_bar->change_status("hp", 1.0 - hp/init_hp);
+    icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
+    gameover_text->show();
+
 }

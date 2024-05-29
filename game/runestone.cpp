@@ -89,5 +89,15 @@ void Runestone::drop(int row, int _row) {
     animation->start();
 }
 
+void Runestone::game_over_drop(){
+    QPropertyAnimation *animation = new QPropertyAnimation(runestone, "geometry");
+    animation->setDuration(1500); // 持续时间2秒
+    animation->setStartValue(QRect(runestone->x(), runestone->y(), runestone->width(), runestone->height()));
+    animation->setEndValue(QRect(runestone->x(), 1500, runestone->width(), runestone->height())); // 终点位置
+    animation->start();
+
+
+
+}
 
 

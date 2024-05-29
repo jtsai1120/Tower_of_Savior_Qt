@@ -41,6 +41,7 @@ public:
     void combo_count_and_drop(bool is_first_count = true);
     void combo_count();
     void drop_detect();
+    void game_over();
 
     int level = 1;
 
@@ -119,15 +120,16 @@ private:
     vector<int> survive = {0,1,2};
 
     QLabel *ui_text;
+    QLabel *gameover_text;
 
-    const double init_hp = 2000;
+    double init_hp = 2000;
     int hp;
     int heal = 0; // 回復量
     int init_heal = 0; // 初始回復量
     int harm; // 所受傷害
     bool burn_road; // 燃燒軌跡技能生效
     int attack_enemy;
-    int damage;
+    double damage;
 };
 
 #endif // MAINWINDOW_H

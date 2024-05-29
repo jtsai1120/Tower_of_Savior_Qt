@@ -44,3 +44,31 @@ void Enemy_hp::reset(int level,int enemy){
     }
 
 }
+
+void Enemy_hp::changeImageColor(int level, int enemy){
+    QPixmap coloredPixmap = hp_bar_icon;
+    // 創建用於繪製圖像的Qpainter
+    QPainter painter(&coloredPixmap);
+    // 根據敵人屬性上色
+    QColor newColor(255, 0, 0); // 預設為紅色
+    if (level == 1){
+        if (enemy == 0) newColor.setRgb(0,0,139); //blue
+        if (enemy == 1) newColor.setRgb(139,0,0); //red
+        if (enemy == 2) newColor.setRgb(0,100,0); //green
+    }
+    if (level == 2){
+        if (enemy == 0) newColor.setRgb(204,204,0);//light
+        if (enemy == 1) newColor.setRgb(0,100,0);//green
+        if (enemy == 2) newColor.setRgb(75,0,130);//dark
+    }
+    if (level == 3){
+        if (enemy == 0) newColor.setRgb(139,0,0); //red
+    }
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(coloredPixmap.rect(), newColor);
+    painter.end();
+
+    // 在 QLabel 上显示修改后的图像
+    hp_bar->setPixmap(coloredPixmap);
+}

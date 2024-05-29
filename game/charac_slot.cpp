@@ -19,8 +19,9 @@ Charac_slot::Charac_slot(QWidget *parent){
         {"dark"}
     };
 
-    charac_atk = {80, 200, 120, 130, 180};
+    charac_atk = {80, 220, 120, 130, 280};
     charac_heal = {20, 2, 15, 11, 8};
+    charac_hp = {600, 300, 450, 350, 180};
 
     charac_pics.resize(paths.size());
     for (int i = 0; i < int(paths.size()); i++){

@@ -4,6 +4,7 @@
 #include <QPixmap>
 #include <QLabel>
 #include <QPropertyAnimation>
+#include <QTimer>
 using namespace std;
 
 class Runestone {
@@ -19,6 +20,8 @@ public:
     void drop(int row, int _row);
 
     void stick_cursor(int _x, int _y);
+
+    void game_over_drop();
 
     int status;
 
