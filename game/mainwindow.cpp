@@ -47,6 +47,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     ui_text->show();
     ui_text->setText("Mission 1");
 
+    skill_text = new QLabel(this);
+    QFont skill_text_font("Consolas", 14, QFont::Bold);
+    skill_text->setFont(skill_text_font);
+    skill_text->setStyleSheet("color: white");
+    skill_text->resize(2000, 300);
+    skill_text->move(32, 540);
+    skill_text->show();
+    skill_text->setText("無技能敘述");
+
     gameover_text = new QLabel(this);
     QFontDatabase::addApplicationFont(":/dataset/Survival Instinx");
     QFont gameover_text_font("Survival Instinx", 50, QFont::Bold);
@@ -56,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     gameover_text->move(50, -250);
     gameover_text->setText("Game Over");
     gameover_text->hide();
+
+    start_button->raise();
 
     // 頂部角色設置欄位
     charac_slots.resize(6);
@@ -156,6 +167,8 @@ void MainWindow::on_start_button_clicked() {
     ui_button->move(180, 250);
     ui_text->move(190, 200);
 
+    skill_text->hide();
+
     combo_text = new QLabel(this);
     QFont combo_text_font("Consolas", 35, QFont::Bold);
     combo_text->setFont(combo_text_font);
@@ -178,6 +191,12 @@ void MainWindow::on_start_button_clicked() {
             init_hp += charac_slots[i]->charac_hp[charac_slots[i]->charac_ID];
         }
     }
+
+    // 若隊長、副隊長為GBC，則三圍提升
+    if (charac_slots[0]->charac_ID > 4){
+        init_hp *= 1.5;
+    }
+    icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
 
     // 基礎模式則置成1
     if (basic){
@@ -237,10 +256,16 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
     if (game_status == 0 && event->button() == Qt::LeftButton){
         // 更換角色
         if (event->y() >= 360 && event->y() <= 450) {
-            charac_slots[event->x() / 90] -> change_charac(basic);
+            int leader = charac_slots[0]->charac_ID;
+            if((event->x() / 90) == 0) leader = -2;
+            charac_slots[event->x() / 90] -> change_charac(leader, basic);
+            // 技能敘述
+            if (!basic) skill_text->setText(skill_descript[charac_slots[event->x() / 90]->charac_ID]);
+
         }
         // 更換任務
         if (event->x() >= 10 && event->x() <= 190 && event->y() >= 520 && event->y() <= 603) {
+            skill_text->setText("無技能敘述，請選擇角色");
             if (basic){
                 basic = false;
                 ui_text->setText("Mission 2");
@@ -249,10 +274,16 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                 basic = true;
                 ui_text->setText("Mission 1");
             }
-            for (int i = 0; i < int(charac_slots.size()); i++)
-                if(charac_slots[i]->charac_ID != -1)
-                    for (int j = 0; j < 5; j++)
-                            charac_slots[i] -> change_charac(basic);
+            for (int i = 0; i < int(charac_slots.size()); i++){
+                int charac_ID = charac_slots[i]->charac_ID;
+                int leader = charac_slots[0]->charac_ID;
+                if(i == 0) leader = -2;
+                if(charac_slots[i]->charac_ID != -1){
+                    charac_slots[i] -> change_charac(leader, basic);
+                    while (charac_slots[i]->charac_ID != charac_ID)
+                        charac_slots[i] -> change_charac(leader, basic);
+                }
+            }
         }
 
         // 結算選擇的角色的 init_heal、hp 總值
@@ -264,6 +295,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                 init_hp += charac_slots[i]->charac_hp[charac_slots[i]->charac_ID];
             }
         }
+
         // 基礎模式則置成1、2000
         if (basic){
             init_heal = 5;
@@ -275,7 +307,32 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         return;
     }
     if (game_status == 1 && event->button() == Qt::LeftButton) {
-        if (event->y() >= 510) {
+        // 開啟技能
+        if (event->y() >= 350 && event->y() <= 440) {
+            if (charac_slots[event->x() / 90]->CD == 0){
+                if (charac_slots[event->x() / 90]->charac_ID == 5){
+                    for (int i=0; i<5; i++){
+                        runestones[i][0]->change_color("dark", 0);
+                        runestones[i][1]->change_color("water", 0);
+                        runestones[i][2]->change_color("fire", 0);
+                        runestones[i][3]->change_color("dark", 0);
+                        runestones[i][4]->change_color("water", 0);
+                        runestones[i][5]->change_color("fire", 0);
+                    }
+                    // 關閉燃燒路徑的位置
+                    for (int i = 0; i < int(runestones.size()); i++){
+                        for (int j = 0; j < int(runestones[i].size()); j++){
+                            if (runestones[i][j]->status == 1) runestones[i][j]->change_color(runestones[i][j]->get_color(), 0);
+                        }
+                    }
+                    burn_road = false;
+                }
+                charac_slots[event->x() / 90]->CD_reset();
+                charac_slots[event->x() / 90]->charac_item->move(0 + (event->x() / 90) * 90, 360);
+            }
+        }
+        // 正常轉珠
+        else if (event->y() >= 510) {
             if (can_move_runestone) {
                 runestone_selected = true;
                 selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
@@ -322,11 +379,13 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             // 判定燃燒
             bool burned = false; // 0 = not burned, 1 = burned, 2 = burned before
             bool burned_before = false; // 0 = not burned, 1 = burned before
-
+            int heat;
+            if (basic) heat = 30;
+            else heat = 100;
 
             if (runestones[(event->y()-510)/90][event->x()/90]->status == 1){
-                harm += 100;
-                hp = hp - 100;
+                harm += heat;
+                hp = hp - heat;
                 icon_bar->heal_text->setStyleSheet("color: red");
                 icon_bar->heal_text->show();
                 icon_bar->heal_text->setText("-" + QString::number(harm));
@@ -340,8 +399,8 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             }
 
             if (runestones[(event->y()-510)/90][event->x()/90]->status == 2 || runestones[selected_runestone.first][selected_runestone.second]->status == 2){
-                harm += 100;
-                hp = hp - 100;
+                harm += heat;
+                hp = hp - heat;
                 icon_bar->heal_text->setStyleSheet("color: red");
                 icon_bar->heal_text->show();
                 icon_bar->heal_text->setText("-" + QString::number(harm));
@@ -481,6 +540,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             for(int i = 0; i < int(charac_slots.size()); i++){
                 if (charac_slots[i]->attack == 0) continue;
                 charac_slots[i]->attack *= combo;
+                if (!basic) // 隊長技能額外倍率
+                    if (charac_slots[0]->charac_ID < 5) charac_slots[i]->attack *= 2;
                 charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
             }
             heal *= combo;
@@ -562,7 +623,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             //QPoint endpoint(enemy[attack_enemy]->enemy_item->x(),enemy[attack_enemy]->enemy_item->y());
             //Bullet shot(startpoint,endpoint);
             //shot.show();
-            if (!basic) damage *= 0.01;
+            if (!basic) damage *= 0.001;
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
@@ -674,19 +735,53 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         if (hp <= 0 ){
             game_over();
         }
+
         // 風化指定符石位置
-        //runestones[2][2]->change_color(runestones[2][2]->get_color(), 2);
+        if (level == 2 && enemy[1]->dead == false){
+            int find = 0;
+            while (find != 2){
+                random_device rd;  // 使用真實隨機數據生成種子
+                mt19937 gen(rd()); // 生成器
+                uniform_int_distribution<> dis(0, 4); // 範圍 [0, vec.size() - 1]
+
+                // 隨機挑選一個數
+                int random_i = dis(gen);
+
+                random_device rd2;  // 使用真實隨機數據生成種子
+                mt19937 gen2(rd2()); // 生成器
+                uniform_int_distribution<> dis2(0, 5); // 範圍 [0, vec.size() - 1]
+
+                // 隨機挑選一個數
+                int random_j = dis2(gen);
+
+                if (runestones[random_i][random_j]->status != 2 && runestones[random_i][random_j]->status != 1){
+                    // 風化該位置
+                    runestones[random_i][random_j]->change_color(runestones[random_i][random_i]->get_color(), 2);
+                    find++;
+                }
+            }
+        }
 
         // 燃燒指定位置
-        //burning.push_back({0, 0});
-        //burning.push_back({1, 2});
-
-        // 顯示燃燒位置
-        //runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
-        //runestones[1][2]->change_color(runestones[1][2]->get_color(), 1);
+        if (!basic && level == 2){
+            if (enemy[0]->dead == false){
+                burning.push_back({0, 0});
+                burning.push_back({0, 5});
+                runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+                runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
+            }
+            if (enemy[2]->dead == false){
+                burning.push_back({4, 0});
+                burning.push_back({4, 5});
+                runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
+                runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
+            }
+        }
 
         // 啟動燃燒軌跡
-        //burn_road = true;
+        if (level == 3){
+            burn_road = true;
+        }
 
         if (game_status != 5){ //gameover
             // 畫面亮回，準備下一局
@@ -695,12 +790,18 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             harm = 0;
             icon_bar->heal_text->hide();
 
-<<<<<<< HEAD
         // 畫面亮回，準備下一局
         darken->move(0, 1000);
         heal = 0;
         harm = 0;
         icon_bar->heal_text->hide();
+
+        // 檢查技能好了嗎
+        for (int i=0; i<charac_slots.size(); i++){
+            if (charac_slots[i]->CD == 0){
+                charac_slots[i]->charac_item->move(0 + i * 90, 350);
+            }
+        }
 
         // 更新血條
         icon_bar->change_status("hp", 1.0 - hp/init_hp);
@@ -708,15 +809,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         game_status = 1; // 開始下一局
         can_move_runestone = true;
         return;
-=======
-            // 更新血條
-            icon_bar->change_status("hp", 1.0 - hp/init_hp);
-            icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
-            game_status = 1; // 開始下一局
-            can_move_runestone = true;
-            return;
         }
->>>>>>> 0e0b1c573d6d8560062d2e5e522fe6ce7386db84
     }
 }
 

@@ -1,6 +1,7 @@
 #include "charac_slot.h"
 
 Charac_slot::Charac_slot(QWidget *parent){
+    charac_ID = -1;
     empty_slot.load(":/dataset/ui/charac slot.jpg");
     vector<QString> paths;
     paths = {
@@ -8,7 +9,12 @@ Charac_slot::Charac_slot(QWidget *parent){
         {":/dataset/character/ID2.png"},
         {":/dataset/character/ID3.png"},
         {":/dataset/character/ID4.png"},
-        {":/dataset/character/ID5.png"}
+        {":/dataset/character/ID5.png"},
+        {":/dataset/character/ID6.png"},
+        {":/dataset/character/ID7.png"},
+        {":/dataset/character/ID8.png"},
+        {":/dataset/character/ID9.png"},
+        {":/dataset/character/ID10.png"}
     };
 
     charac_clr = {
@@ -16,12 +22,20 @@ Charac_slot::Charac_slot(QWidget *parent){
         {"fire"},
         {"earth"},
         {"light"},
-        {"dark"}
+        {"dark"},
+        {"dark"},
+        {"water"},
+        {"earth"},
+        {"fire"},
+        {"light"},
     };
 
-    charac_atk = {80, 220, 120, 130, 280};
-    charac_heal = {20, 2, 15, 11, 8};
-    charac_hp = {600, 300, 450, 350, 180};
+    charac_atk = {80, 220, 120, 130, 280, 330, 280, 180, 260, 230};
+    charac_heal = {20, 2, 15, 11, 8, 12, 24, 48, 30, 40};
+    charac_hp = {600, 300, 450, 350, 180, 400, 500, 800, 450, 620};
+    charac_CD = {-1, -1, -1, -1, -1, 8, -1, -1, -1, -1};
+
+    CD = -1;
 
     charac_pics.resize(paths.size());
     for (int i = 0; i < int(paths.size()); i++){
@@ -38,13 +52,18 @@ Charac_slot::Charac_slot(QWidget *parent){
     attack_text->resize(200, 200);
 }
 
-void Charac_slot::change_charac(bool is_basic){
+void Charac_slot::change_charac(int is_lead, bool is_basic){
     basic = is_basic;
+    leader = is_lead;
 
     if (charac_ID + 1 < int(charac_pics.size()))
         charac_ID++;
     else
         charac_ID = 0;
+    if (leader == -2) leader = charac_ID;
+
+    if (!basic) CD = charac_CD[charac_ID]; // 設定CD
+
     charac_item->setPixmap(charac_pics[charac_ID]);
 
     attribute = charac_clr[charac_ID];
@@ -62,7 +81,6 @@ void Charac_slot::change_charac(bool is_basic){
 
 void Charac_slot::add_attack(Runestone_pair rp){
     QString clr = rp.color;
-
     if (charac_clr[charac_ID] == clr){
         if(basic) attack += rp.pair.size();
         else attack += charac_atk[charac_ID] * rp.pair.size();
@@ -70,10 +88,30 @@ void Charac_slot::add_attack(Runestone_pair rp){
             all_atk = true;
         qDebug()<< "all_atk = "<<all_atk;
     }
+    else if (!basic){
+        if (leader == 5){
+            if ((charac_clr[charac_ID] == "water" || charac_clr[charac_ID] == "fire" || charac_clr[charac_ID] == "dark")
+                    && (clr == "water" || clr == "fire" || clr == "dark")){
+                if(basic) attack += rp.pair.size();
+                else attack += charac_atk[charac_ID] * rp.pair.size();
+                if (rp.pair.size() > 5)
+                    all_atk = true;
+                qDebug()<< "all_atk = "<<all_atk;
+            }
+        }
+        if (leader == 9){
+            attack *= 1.3; // combo效果 +30%
+        }
+    }
 }
 
 void Charac_slot::new_round(){
     attack = 0;
+    if (CD > 0) CD--;
     all_atk = false;
+}
+
+void Charac_slot::CD_reset(){
+    CD = charac_CD[charac_ID];
 }
 

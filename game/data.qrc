@@ -60,5 +60,10 @@
         <file>dataset/ui/start button.jpg</file>
         <file>dataset/ui/darken.png</file>
         <file>dataset/ui/empty button.jpg</file>
+        <file>dataset/character/ID6.png</file>
+        <file>dataset/character/ID7.png</file>
+        <file>dataset/character/ID8.png</file>
+        <file>dataset/character/ID10.png</file>
+        <file>dataset/character/ID9.png</file>
     </qresource>
 </RCC>

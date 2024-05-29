@@ -121,6 +121,8 @@ private:
     vector<int> survive = {0,1,2};
 
     QLabel *ui_text;
+    QLabel *skill_text;
+
     QLabel *gameover_text;
 
     double init_hp = 2000;
@@ -131,6 +133,19 @@ private:
     bool burn_road; // 燃燒軌跡技能生效
     int attack_enemy;
     double damage;
+
+    vector<QString> skill_descript = {
+        {"隊長技能: atk 2倍"},
+        {"隊長技能: atk 2倍"},
+        {"隊長技能: atk 2倍"},
+        {"隊長技能: atk 2倍"},
+        {"隊長技能: atk 2倍"},
+        {"我要證明，我們並沒有錯! CD 8\n  還原、轉換固定版面，\n  一回合內消除所有燃燒效果\n\n隊長技能: 水火暗互相兼具，hp 1.5倍"},
+        {"技能敘述: 無"},
+        {"技能敘述: 無"},
+        {"技能敘述: 無"},
+        {"隊長技能: 每combo將提升atk 30%； hp 1.5倍"},
+    };
 };
 
 #endif // MAINWINDOW_H
