@@ -41,6 +41,7 @@ public:
     void combo_count_and_drop(bool is_first_count = true);
     void combo_count();
     void drop_detect();
+    void game_over();
 
     int level = 1;
 
@@ -119,6 +120,7 @@ private:
     vector<int> survive = {0,1,2};
 
     QLabel *ui_text;
+    QLabel *gameover_text;
 
     double init_hp = 2000;
     int hp;
