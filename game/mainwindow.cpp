@@ -211,7 +211,7 @@ void MainWindow::on_start_button_clicked() {
 
 void MainWindow::paintEvent(QPaintEvent *event) {
     if (runestone_drift) {
-        qDebug() << ms_elapsed;
+        //qDebug() << ms_elapsed;
         if (ms_elapsed >= time_limit * 1000) {
             // 第二種結束方式： 倒數時間到 (第一種結束方式： 放開 Cursor)
             drift_timer->stop();
@@ -348,6 +348,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
     if (game_status == 1 && event->button() == Qt::LeftButton) {
         runestone_selected = false;
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
+        runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1);
         if (runestone_drift) {
             // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
             drift_timer->stop();
@@ -444,6 +445,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             }
 
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
+            runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1);
             selected_runestone = make_pair((event->y()-510)/90, event->x()/90); 
             if (!drift_timer_started) { // 開始計時
                 ms_elapsed = 0; // 計時器 (經過多少 ms)
@@ -454,6 +456,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             }
         }
         runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
+        runestones[selected_runestone.first][selected_runestone.second]->set_opacity(0.5);
     }
     if (runestone_drift) {
         // 使 Cursor 無法移動到畫面外導致 Crash
@@ -486,6 +489,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
     } else if (game_status == 1){ // 準備攻擊及回血
         for (int i = 0; i < cur_pair_num; i++) delete light_halo_vfxs[i];
         light_halo_vfxs.clear();
+        for (auto row : runestones)
+            for (auto i : row)
+                i->set_opacity(1);
         QTimer::singleShot(105, [&](){
             if (combo_counter.count(runestones).empty()) {
                 qDebug() << "final combo : " << combo;
@@ -737,28 +743,26 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
 
         // 風化指定符石位置
+        int weather_amount = 0;
         if (level == 2 && enemy[1]->dead == false){
-            int find = 0;
-            while (find != 2){
-                random_device rd;  // 使用真實隨機數據生成種子
-                mt19937 gen(rd()); // 生成器
-                uniform_int_distribution<> dis(0, 4); // 範圍 [0, vec.size() - 1]
-
-                // 隨機挑選一個數
-                int random_i = dis(gen);
-
-                random_device rd2;  // 使用真實隨機數據生成種子
-                mt19937 gen2(rd2()); // 生成器
-                uniform_int_distribution<> dis2(0, 5); // 範圍 [0, vec.size() - 1]
-
-                // 隨機挑選一個數
-                int random_j = dis2(gen);
-
-                if (runestones[random_i][random_j]->status != 2 && runestones[random_i][random_j]->status != 1){
-                    // 風化該位置
-                    runestones[random_i][random_j]->change_color(runestones[random_i][random_i]->get_color(), 2);
-                    find++;
-                }
+            QSound::play(":/dataset/setting_select.wav");
+            vector<int> sel;
+            for (int row = 0; row < 5; row++)
+                for (int col = 0; col < 6; col++)
+                    if (runestones[row][col]->status == 0)
+                        sel.push_back(row*6+col);
+            uniform_int_distribution<> _dist(0, int(sel.size())-1);
+            vector<bool> seled(int(sel.size()), false);
+            int rd_num;
+            for (int i = 0; i < 2; i++) {
+                weather_amount++;
+                do {
+                    rd_num = _dist(gen);
+                } while(seled[rd_num]);
+                seled[rd_num] = true;
+                int row = sel[rd_num] / 6;
+                int col = sel[rd_num] % 6;
+                runestones[row][col]->change_color(runestones[row][col]->get_color(), 2);
             }
         }
 
@@ -783,32 +787,48 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             burn_road = true;
         }
 
-        if (game_status != 5){ //gameover
-            // 畫面亮回，準備下一局
-            darken->move(0, 1000);
-            heal = 0;
-            harm = 0;
-            icon_bar->heal_text->hide();
+        if (game_status != 5){ //gameover = 5
+            if (weather_amount != 0) {
+                QTimer::singleShot(1000, [&](){
+                    // 畫面亮回，準備下一局
+                    darken->move(0, 1000);
+                    heal = 0;
+                    harm = 0;
+                    icon_bar->heal_text->hide();
 
-        // 畫面亮回，準備下一局
-        darken->move(0, 1000);
-        heal = 0;
-        harm = 0;
-        icon_bar->heal_text->hide();
+                    // 檢查技能好了嗎
+                    for (int i=0; i < int(charac_slots.size()); i++){
+                        if (charac_slots[i]->CD == 0){
+                            charac_slots[i]->charac_item->move(0 + i * 90, 350);
+                        }
+                    }
 
-        // 檢查技能好了嗎
-        for (int i=0; i<charac_slots.size(); i++){
-            if (charac_slots[i]->CD == 0){
-                charac_slots[i]->charac_item->move(0 + i * 90, 350);
+                    // 更新血條
+                    icon_bar->change_status("hp", 1.0 - hp/init_hp);
+                    icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
+                    game_status = 1; // 開始下一局
+                    can_move_runestone = true;
+                });
+            } else {
+                // 畫面亮回，準備下一局
+                darken->move(0, 1000);
+                heal = 0;
+                harm = 0;
+                icon_bar->heal_text->hide();
+
+                // 檢查技能好了嗎
+                for (int i=0; i < int(charac_slots.size()); i++){
+                    if (charac_slots[i]->CD == 0){
+                        charac_slots[i]->charac_item->move(0 + i * 90, 350);
+                    }
+                }
+
+                // 更新血條
+                icon_bar->change_status("hp", 1.0 - hp/init_hp);
+                icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
+                game_status = 1; // 開始下一局
+                can_move_runestone = true;
             }
-        }
-
-        // 更新血條
-        icon_bar->change_status("hp", 1.0 - hp/init_hp);
-        icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
-        game_status = 1; // 開始下一局
-        can_move_runestone = true;
-        return;
         }
     }
 }
@@ -924,18 +944,18 @@ void MainWindow::combo_eliminate() {
 
 void MainWindow::drop_detect() {
     tmp_runestones = vector<vector<Runestone*>>(10, vector<Runestone*>(6, nullptr));
-    result_colors = vector<vector<QString>>(5, vector<QString>(6, "empty"));
+    result_colors = vector<vector<pair<QString,int>>>(5, vector<pair<QString,int>>(6, make_pair("empty", 0)));
     col_bottom = vector<int>(6, 4);
     for (int col = 0; col < 6; col++) {
         // 找最下面的空白珠
         while(col_bottom[col] >= 0 && runestones[col_bottom[col]][col]->get_color() != "empty") {
-            result_colors[col_bottom[col]][col] = runestones[col_bottom[col]][col]->get_color();
+            result_colors[col_bottom[col]][col] = make_pair(runestones[col_bottom[col]][col]->get_color(), ((runestones[col_bottom[col]][col]->get_status()==2)? 2 : 0));
             col_bottom[col]--;
         }
         int count_empty = (col_bottom[col]>=0)? 1:0;
         for (int row = col_bottom[col] - 1; row >= 0; row--) {
             if (runestones[row][col]->get_color()!="empty") {
-                tmp_runestones[row+5][col] = new Runestone(this, row, col, runestones[row][col]->get_color());
+                tmp_runestones[row+5][col] = new Runestone(this, row, col, runestones[row][col]->get_color(), ((runestones[row][col]->get_status()==2)? 2 : 0));
                 runestones[row][col]->change_color("empty", 0);
             } else count_empty++;
         }
@@ -955,7 +975,7 @@ void MainWindow::drop_detect() {
             }
             if (col_bottom[col]==-1) continue;
             tmp_runestones[row][col]->drop(row-5, col_bottom[col]);
-            result_colors[col_bottom[col]][col] = tmp_runestones[row][col]->get_color();
+            result_colors[col_bottom[col]][col] = make_pair(tmp_runestones[row][col]->get_color(), tmp_runestones[row][col]->get_status());
             max_wait_time = std::max(max_wait_time, (col_bottom[col]+5-row));
             col_bottom[col]--;
         }
@@ -968,7 +988,7 @@ void MainWindow::drop_detect() {
         }
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 6; j++) {
-                runestones[i][j]->change_color(result_colors[i][j], 0);
+                runestones[i][j]->change_color(result_colors[i][j].first, result_colors[i][j].second);
             }
         }
         result_colors.clear();
@@ -981,8 +1001,8 @@ void MainWindow::game_over(){
     darken->move(0, 0);
     darken->raise();
     game_status = 5;
-    for (int i = 0; i<runestones.size(); i++){
-        for (int j=0;j<runestones[i].size();j++){
+    for (int i = 0; i < int(runestones.size()); i++){
+        for (int j = 0; j < int(runestones[i].size()); j++){
             runestones[i][j]->game_over_drop();
         }
     }
@@ -990,8 +1010,8 @@ void MainWindow::game_over(){
         enemy[i]->enemy_item->move(0,1000);
         enemy_hp[i]->hp_bar->move(0,1000);
     }
-    icon_bar->change_status("hp", 1.0 - hp/init_hp);
-    icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
+    icon_bar->change_status("hp", 1.0);
+    icon_bar->hp_text->setText(QString::number(0) + "/" + QString::number(init_hp));
     gameover_text->show();
 
 }

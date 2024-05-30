@@ -1,7 +1,7 @@
 #include "runestone.h"
 #include <QDebug>
 
-Runestone::Runestone(QWidget *parent, int _row, int _col, QString clr) {
+Runestone::Runestone(QWidget *parent, int _row, int _col, QString clr, int get_status) {
     dark_stone_pic.load(":/dataset/runestone/dark_stone.png");
     earth_stone_pic.load(":/dataset/runestone/earth_stone.png");
     fire_stone_pic.load(":/dataset/runestone/fire_stone.png");
@@ -23,15 +23,25 @@ Runestone::Runestone(QWidget *parent, int _row, int _col, QString clr) {
     weathered_light_stone_pic.load(":/dataset/runestone/weathered_light_stone.png");
     weathered_water_stone_pic.load(":/dataset/runestone/weathered_water_stone.png");
 
+    weathered_dark_stone_pic = weathered_dark_stone_pic.scaled(90, 90);
+    weathered_earth_stone_pic = weathered_earth_stone_pic.scaled(90, 90);
+    weathered_fire_stone_pic = weathered_fire_stone_pic.scaled(90, 90);
+    weathered_heart_stone_pic = weathered_heart_stone_pic.scaled(90, 90);
+    weathered_light_stone_pic = weathered_light_stone_pic.scaled(90, 90);
+    weathered_water_stone_pic = weathered_water_stone_pic.scaled(90, 90);
+
     runestone = new QLabel(parent);
     runestone->setFixedSize(dark_stone_pic.width(), dark_stone_pic.height());
     move(_row, _col);
-    change_color(clr, 0);
+    change_color(clr, get_status);
     runestone->show();
 
-    status = 0; // 0為正常, 1為燃燒, 2為風化
+    status = get_status; // 0為正常, 1為燃燒, 2為風化
 
-    animation = new QPropertyAnimation(runestone, "pos");
+    drop_animation = new QPropertyAnimation(runestone, "pos");
+    game_over_drop_animation = new QPropertyAnimation(runestone, "geometry");
+
+    opacityEffect = new QGraphicsOpacityEffect;
 }
 
 Runestone::~Runestone() {
@@ -78,26 +88,28 @@ void Runestone::change_color(QString clr, int get_status) {
 
 void Runestone::stick_cursor(int _x, int _y) {
     runestone->move(_x-dark_stone_pic.width()/2-10, _y-dark_stone_pic.height()/2-10);
+    set_opacity(0.5);
+}
+
+void Runestone::set_opacity(double n) {
+    opacityEffect->setOpacity(n); // 50% transparency
+    runestone->setGraphicsEffect(opacityEffect);
 }
 
 void Runestone::drop(int row, int _row) {
     if (_row <= row) return;
-    animation->setEasingCurve(QEasingCurve::OutCurve);
-    animation->setDuration((_row-row)*105);
-    animation->setStartValue(QPoint(runestone->x(), runestone->y()));
-    animation->setEndValue(QPoint(runestone->x(), _row*90+510));
-    animation->start();
+    drop_animation->setEasingCurve(QEasingCurve::OutCurve);
+    drop_animation->setDuration((_row-row)*105);
+    drop_animation->setStartValue(QPoint(runestone->x(), runestone->y()));
+    drop_animation->setEndValue(QPoint(runestone->x(), _row*90+510));
+    drop_animation->start();
 }
 
 void Runestone::game_over_drop(){
-    QPropertyAnimation *animation = new QPropertyAnimation(runestone, "geometry");
-    animation->setDuration(1500); // 持续时间2秒
-    animation->setStartValue(QRect(runestone->x(), runestone->y(), runestone->width(), runestone->height()));
-    animation->setEndValue(QRect(runestone->x(), 1500, runestone->width(), runestone->height())); // 终点位置
-    animation->start();
-
-
-
+    game_over_drop_animation->setDuration(1500); // 持續時間1.5秒
+    game_over_drop_animation->setStartValue(QRect(runestone->x(), runestone->y(), runestone->width(), runestone->height()));
+    game_over_drop_animation->setEndValue(QRect(runestone->x(), 1500, runestone->width(), runestone->height())); // 終點位置
+    game_over_drop_animation->start();
 }
 
 

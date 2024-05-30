@@ -5,14 +5,16 @@
 #include <QLabel>
 #include <QPropertyAnimation>
 #include <QTimer>
+#include <QGraphicsOpacityEffect>
 using namespace std;
 
 class Runestone {
 public:
-    Runestone(QWidget *parent, int _row, int _col, QString clr);
+    Runestone(QWidget *parent, int _row, int _col, QString clr, int get_status=0);
     ~Runestone();
 
     QString get_color() const { return color; }
+    int get_status() const { return status; }
 
     void move(int row, int col);
     void change_color(QString clr, int status);
@@ -20,6 +22,8 @@ public:
     void drop(int row, int _row);
 
     void stick_cursor(int _x, int _y);
+
+    void set_opacity(double n);
 
     void game_over_drop();
 
@@ -53,7 +57,10 @@ private:
     QString speicial_status;
     int row, col;
 
-    QPropertyAnimation *animation;
+    QPropertyAnimation *drop_animation;
+    QPropertyAnimation *game_over_drop_animation;
+
+    QGraphicsOpacityEffect *opacityEffect;
 };
 
 #endif // RUNESTONE_H

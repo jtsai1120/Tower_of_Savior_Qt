@@ -25,12 +25,6 @@
         <file>dataset/runestone/heart_stone.png</file>
         <file>dataset/runestone/light_stone.png</file>
         <file>dataset/runestone/water_stone.png</file>
-        <file>dataset/runestone/weathered_dark_stone.png</file>
-        <file>dataset/runestone/weathered_earth_stone.png</file>
-        <file>dataset/runestone/weathered_fire_stone.png</file>
-        <file>dataset/runestone/weathered_heart_stone.png</file>
-        <file>dataset/runestone/weathered_light_stone.png</file>
-        <file>dataset/runestone/weathered_water_stone.png</file>
         <file>dataset/ui/cd_bar.png</file>
         <file>dataset/ui/cd_icon.png</file>
         <file>dataset/ui/cursur.png</file>
@@ -65,5 +59,13 @@
         <file>dataset/character/ID8.png</file>
         <file>dataset/character/ID10.png</file>
         <file>dataset/character/ID9.png</file>
+        <file>dataset/runestone/weathered_heart_stone.png</file>
+        <file>dataset/runestone/weathered_light_stone.png</file>
+        <file>dataset/runestone/weathered_water_stone.png</file>
+        <file>dataset/runestone/weathered_dark_stone.png</file>
+        <file>dataset/runestone/weathered_earth_stone.png</file>
+        <file>dataset/runestone/weathered_fire_stone.png</file>
+        <file>dataset/game_win.wav</file>
+        <file>dataset/setting_select.wav</file>
     </qresource>
 </RCC>

@@ -92,7 +92,7 @@ private:
     QLabel *combo_text;
 
     vector<vector<Runestone*>> tmp_runestones;
-    vector<vector<QString>> result_colors;
+    vector<vector<pair<QString,int>>> result_colors;
 
     // start btn
     QPushButton *start_button = new QPushButton;
