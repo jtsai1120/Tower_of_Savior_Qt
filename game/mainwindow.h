@@ -49,6 +49,9 @@ public:
 public slots:
     void combo_eliminate();
     void on_start_button_clicked();
+    void on_surrender_button_clicked();
+    void on_back_button_clicked();
+    void on_restart_button_clicked();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -115,6 +118,7 @@ private:
     // darken
     QPixmap darken_pic;
     QLabel *darken;
+    QGraphicsOpacityEffect *darken_opacityEffect;
 
     // 燃燒位置
     vector<pair<int,int>> burning;
@@ -124,6 +128,27 @@ private:
     QLabel *skill_text;
 
     QLabel *gameover_text;
+
+    // 設定介面
+    QPixmap setting_pic;
+    QLabel *setting;
+
+    QPushButton *surrender_button;
+    QPixmap surrender_button_pic;
+    ButtonItem *surrender_button_item;
+
+    QPixmap full_darken_pic;
+    QLabel *full_darken;
+    QGraphicsOpacityEffect *full_darken_opacityEffect;
+
+    QPushButton *back_button;
+    QPixmap back_button_pic;
+    ButtonItem *back_button_item;
+
+    // Restart Button
+    QPushButton *restart_button;
+    QPixmap restart_button_pic;
+    ButtonItem *restart_button_item;
 
     double init_hp = 2000;
     int hp;

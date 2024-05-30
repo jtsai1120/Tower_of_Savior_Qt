@@ -66,8 +66,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     gameover_text->setText("Game Over");
     gameover_text->hide();
 
-    start_button->raise();
-
     // 頂部角色設置欄位
     charac_slots.resize(6);
     for (int i = 0; i < 6; i++) {
@@ -83,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     enemy.resize(3);
     enemy_hp.resize(3);
     for (int i = 0; i < 3; i++){
+        delete enemy[i];
+        delete enemy_hp[i];
         enemy[i] = new Enemy(this);
         enemy[i]->enemy_item->setFixedWidth(120);
         enemy[i]->enemy_item->setFixedHeight(120);
@@ -111,6 +111,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
     drift_timer_started = false;
 
+    // Combo text
+    combo_text = new QLabel(this);
+    QFont combo_text_font("Consolas", 35, QFont::Bold);
+    combo_text->setFont(combo_text_font);
+    combo_text->setStyleSheet("color: yellow");
+    combo_text->resize(300, 200);
+    combo_text->move(540-300, 960-200);
+    combo_text->hide();
 
     combo_cd = new QTimer;
     connect(combo_cd, SIGNAL(timeout()), this, SLOT(combo_eliminate()));
@@ -129,22 +137,80 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     // 設計成半透明
     // Create an opacity effect
-    QGraphicsOpacityEffect *opacityEffect = new QGraphicsOpacityEffect;
+    darken_opacityEffect = new QGraphicsOpacityEffect;
     // Set the desired opacity (0.0 = fully transparent, 1.0 = fully opaque)
-    opacityEffect->setOpacity(0.5); // 50% transparency
+    darken_opacityEffect->setOpacity(0.5); // 50% transparency
     // Apply the opacity effect to the label
-    darken->setGraphicsEffect(opacityEffect);
+    darken->setGraphicsEffect(darken_opacityEffect);
 
+    // 設定介面
+    setting_pic.load(":/dataset/setting_pic.png");
+    setting_pic = setting_pic.scaled(setting_pic.width()*2.5, setting_pic.height()*2.5);
+    setting = new QLabel(this);
+    setting->setPixmap(setting_pic);
+    setting->resize(setting_pic.size());
+    setting->move(540-setting_pic.width(), 0);
+    setting->hide();
+
+    surrender_button = new QPushButton(this);
+    surrender_button_pic.load(":/dataset/ui/surrender button.jpg");
+    surrender_button->setIcon(QIcon(surrender_button_pic));
+    surrender_button->setIconSize(surrender_button_pic.size());
+    surrender_button_item = new ButtonItem(surrender_button);
+    surrender_button->setFixedWidth(180);
+    surrender_button->setFixedHeight(83);
+    surrender_button->move(540/2 - surrender_button->width()/2,960/4);
+    surrender_button->hide();
+    connect(surrender_button, SIGNAL(clicked()), this, SLOT(on_surrender_button_clicked()));
+
+    full_darken = new QLabel(this);
+    full_darken_pic.load(":/dataset/ui/full_darken.png");
+    full_darken_pic = full_darken_pic.scaled(540, 960);
+    full_darken->setPixmap(full_darken_pic);
+    full_darken->setFixedSize(full_darken_pic.width(), full_darken_pic.height());
+    full_darken->move(0,0);
+    full_darken_opacityEffect = new QGraphicsOpacityEffect;
+    full_darken_opacityEffect->setOpacity(0.5);
+    full_darken->setGraphicsEffect(full_darken_opacityEffect);
+    full_darken->hide();
+
+    back_button = new QPushButton(this);
+    back_button_pic.load(":/dataset/ui/back button.jpg");
+    back_button->setIcon(QIcon(back_button_pic));
+    back_button->setIconSize(back_button_pic.size());
+    back_button_item = new ButtonItem(back_button);
+    back_button->setFixedWidth(180);
+    back_button->setFixedHeight(83);
+    back_button->move(540/2 - back_button->width()/2, 960/4 + 150);
+    back_button->hide();
+    connect(back_button, SIGNAL(clicked()), this, SLOT(on_back_button_clicked()));
+
+    // Restart Button
+    restart_button = new QPushButton(this);
+    restart_button_pic.load(":/dataset/ui/restart button.jpg");
+    restart_button->setIcon(QIcon(restart_button_pic));
+    restart_button->setIconSize(restart_button_pic.size());
+    restart_button_item = new ButtonItem(restart_button);
+    restart_button->setFixedWidth(180);
+    restart_button->setFixedHeight(83);
+    restart_button->move(540/2 - restart_button->width()/2, 960/4*3 - restart_button->height()/2);
+    restart_button->hide();
+    connect(restart_button, SIGNAL(clicked()), this, SLOT(on_restart_button_clicked()));
+
+    start_button->raise();
+    bg->menu_bgm->play();
 }
 
 void MainWindow::on_start_button_clicked() {
     qDebug() << "Start Button Clicked!";
+    bg->menu_bgm->stop();
+    bg->battle_bgm->play();
 
     // 至少要有隊長和副隊長才能開始
     if(charac_slots[0]->charac_ID == -1 || charac_slots[5]->charac_ID == -1)
         return;
 
-    start_button->move(40, 1000); // 只是移出螢幕
+    start_button->hide();
     game_status = 1; // game start
 
 
@@ -162,20 +228,14 @@ void MainWindow::on_start_button_clicked() {
         enemy_hp[i]->hp_bar->move(100 +  133*i, 330);
     }
 
+    setting->show();
+
     ui_button->hide();
     ui_text->hide();
     ui_button->move(180, 250);
     ui_text->move(190, 200);
 
     skill_text->hide();
-
-    combo_text = new QLabel(this);
-    QFont combo_text_font("Consolas", 35, QFont::Bold);
-    combo_text->setFont(combo_text_font);
-    combo_text->setStyleSheet("color: yellow");
-    combo_text->resize(300, 200);
-    combo_text->move(540-300, 960-200);
-    combo_text->hide();
 
     // 清除空的隊伍欄位
     init_heal = 0;
@@ -207,6 +267,84 @@ void MainWindow::on_start_button_clicked() {
     icon_bar->heal_text->hide();
     hp = init_hp;
     burn_road = false;
+}
+
+void MainWindow::on_surrender_button_clicked() {
+    game_status = 5;
+    QSound::play(":/dataset/setting_select.wav");
+    full_darken->hide();
+    surrender_button->hide();
+    back_button->hide();
+    game_over();
+}
+
+void MainWindow::on_back_button_clicked() {
+    game_status = 1;
+    can_move_runestone = 1;
+    QSound::play(":/dataset/setting_select.wav");
+    full_darken->hide();
+    surrender_button->hide();
+    back_button->hide();
+}
+
+void MainWindow::on_restart_button_clicked() {
+    game_status = 0;
+    for (int i = 0; i < 3; i++){
+        enemy[i]->enemy_item->hide();
+        enemy_hp[i]->hp_bar->hide();
+    }
+    for (int i = 0; i < int(runestones.size()); i++){
+        for (int j = 0; j < int(runestones[i].size()); j++){
+            runestones[i][j]->change_color("empty", 0);
+        }
+    }
+    full_darken->hide();
+    gameover_text->hide();
+    restart_button->hide();
+    darken->hide();
+    setting->hide();
+    start_button->show();
+    ui_button->show();
+    ui_button->move(10, 520);
+    ui_text->show();
+    ui_text->move(32, 461);
+    ui_text->setText("Mission 1");
+    skill_text->show();
+    skill_text->setText("");
+    for (int i = 0; i < 6; i++) {
+        delete charac_slots[i];
+        charac_slots[i] = new Charac_slot(this);
+        charac_slots[i]->charac_item->setFixedWidth(90);
+        charac_slots[i]->charac_item->setFixedHeight(90);
+        charac_slots[i]->charac_item->move(0 + i * 90, 360);
+        charac_slots[i]->attack_text->move(25 + i * 90, 315);
+        charac_slots[i]->charac_item->show();
+    }
+    for (int i = 0; i < 3; i++){
+        delete enemy[i];
+        delete enemy_hp[i];
+        enemy[i] = new Enemy(this);
+        enemy[i]->enemy_item->setFixedWidth(120);
+        enemy[i]->enemy_item->setFixedHeight(120);
+        enemy[i]->enemy_item->move(0,1000);
+        enemy[i]->enemy_item->show();
+        enemy[i]->show(1,i);
+
+        enemy_hp[i] = new Enemy_hp(this);
+        enemy_hp[i]->changeImageColor(1,i);
+        enemy_hp[i]->hp_bar->move(0,1000);
+        enemy_hp[i]->hp_bar->show();
+    }
+    can_move_runestone = true;
+    runestone_selected = false; // is cursor select a runestone ?
+    runestone_swap = false;
+    runestone_drift = false;
+    ms_elapsed = 0;
+    drift_timer_started = false;
+    icon_bar->change_status("hp", 0.0);
+    icon_bar->initial_hp = init_hp;
+    bg->menu_bgm->play();
+    start_button->raise();
 }
 
 void MainWindow::paintEvent(QPaintEvent *event) {
@@ -307,8 +445,21 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         return;
     }
     if (game_status == 1 && event->button() == Qt::LeftButton) {
+        // 開啟設定介面
+        if (can_move_runestone && event->y() <= setting->height() && event->x() >= 540 - setting->width()) {
+            game_status = -1;
+            can_move_runestone = 0;
+            qDebug() << "setting";
+            QSound::play(":/dataset/setting_select.wav");
+            full_darken->show();
+            full_darken->raise();
+            surrender_button->show();
+            surrender_button->raise();
+            back_button->show();
+            back_button->raise();
+        }
         // 開啟技能
-        if (event->y() >= 350 && event->y() <= 440) {
+        else if (event->y() >= 350 && event->y() <= 440) {
             if (charac_slots[event->x() / 90]->CD == 0){
                 if (charac_slots[event->x() / 90]->charac_ID == 5){
                     for (int i=0; i<5; i++){
@@ -527,6 +678,15 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 ui_text->setText("Wave 0" + QString::number(level + 1) + "/ 03");
                 if (level == 3){ // 結束了
                     ui_text->setText("  VICTORY!");
+                    bg->battle_bgm->stop();
+                    bg->win_bgm->play();
+                    full_darken->show();
+                    full_darken->raise();
+                    ui_button->raise();
+                    ui_text->raise();
+                    restart_button->show();
+                    restart_button->raise();
+                    return;
                 }
                 combo_cd->start(800);
                 attack_wait_count++;
@@ -745,7 +905,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         // 風化指定符石位置
         int weather_amount = 0;
         if (level == 2 && enemy[1]->dead == false){
-            QSound::play(":/dataset/setting_select.wav");
+            //QSound::play(":/dataset/setting_select.wav");
             vector<int> sel;
             for (int row = 0; row < 5; row++)
                 for (int col = 0; col < 6; col++)
@@ -859,6 +1019,7 @@ void MainWindow::combo_count() {
         return;
     }
     combo_text->show();
+    combo_text->raise();
     cur_pair_num = 0;
     combo_eliminate();
     combo_cd->start(390);
@@ -998,20 +1159,27 @@ void MainWindow::drop_detect() {
 }
 
 void MainWindow::game_over(){
-    darken->move(0, 0);
-    darken->raise();
+    bg->battle_bgm->stop();
+    QSound::play(":/dataset/game_lose.wav");
+    full_darken->show();
+    full_darken->raise();
     game_status = 5;
     for (int i = 0; i < int(runestones.size()); i++){
         for (int j = 0; j < int(runestones[i].size()); j++){
             runestones[i][j]->game_over_drop();
         }
     }
+
     for (int i = 0; i < 3; i++){
-        enemy[i]->enemy_item->move(0,1000);
-        enemy_hp[i]->hp_bar->move(0,1000);
+        enemy[i]->enemy_item->hide();
+        enemy_hp[i]->hp_bar->hide();
     }
+
     icon_bar->change_status("hp", 1.0);
     icon_bar->hp_text->setText(QString::number(0) + "/" + QString::number(init_hp));
     gameover_text->show();
+    gameover_text->raise();
 
+    restart_button->show();
+    restart_button->raise();
 }

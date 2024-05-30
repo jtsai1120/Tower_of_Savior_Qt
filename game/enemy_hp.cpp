@@ -52,17 +52,17 @@ void Enemy_hp::changeImageColor(int level, int enemy){
     // 根據敵人屬性上色
     QColor newColor(255, 0, 0); // 預設為紅色
     if (level == 1){
-        if (enemy == 0) newColor.setRgb(0,0,139); //blue
-        if (enemy == 1) newColor.setRgb(139,0,0); //red
-        if (enemy == 2) newColor.setRgb(0,100,0); //green
+        if (enemy == 0) newColor.setRgb(50,110,250); //blue
+        if (enemy == 1) newColor.setRgb(200,0,0); //red
+        if (enemy == 2) newColor.setRgb(50,100,0); //green
     }
     if (level == 2){
-        if (enemy == 0) newColor.setRgb(204,204,0);//light
-        if (enemy == 1) newColor.setRgb(0,100,0);//green
-        if (enemy == 2) newColor.setRgb(75,0,130);//dark
+        if (enemy == 0) newColor.setRgb(250,250,0);//light
+        if (enemy == 1) newColor.setRgb(50,100,0);//green
+        if (enemy == 2) newColor.setRgb(150,0,200);//dark
     }
     if (level == 3){
-        if (enemy == 0) newColor.setRgb(139,0,0); //red
+        if (enemy == 0) newColor.setRgb(200,0,0); //red
     }
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);

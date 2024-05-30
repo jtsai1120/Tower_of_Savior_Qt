@@ -21,5 +21,10 @@ Bg::Bg(QWidget *parent) {
 
     battle_bgm = new QSound(":/dataset/battle_bgm.wav");
     battle_bgm->setLoops(-1);
-    battle_bgm->play();
+
+    menu_bgm = new QSound(":/dataset/menu_bgm.wav");
+    menu_bgm->setLoops(-1);
+
+    win_bgm = new QSound(":/dataset/game_win.wav");
+    //win_bgm->setLoops(-1);
 }
