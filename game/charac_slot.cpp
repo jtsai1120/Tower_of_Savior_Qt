@@ -128,7 +128,7 @@ void Charac_slot::add_attack(Runestone_pair rp){
 
 void Charac_slot::new_round(){
     attack = 0;
-    if (CD > 0) CD--;
+    if (CD > 0 && !basic) CD--;
     skill_power = -1;
     extra_atk = 1;
     all_atk = false;
@@ -137,5 +137,16 @@ void Charac_slot::new_round(){
 void Charac_slot::CD_reset(){
     CD = charac_CD[charac_ID];
     skill_power = charac_ID;
+}
+
+void Charac_slot::reset(){
+    leader = -1;
+    charac_ID = -1;
+    CD = -1;
+    skill_power = -1;
+    extra_atk = 1;
+    attack = 0;
+    all_atk = false;
+    charac_item->setPixmap(empty_slot);
 }
 

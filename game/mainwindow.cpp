@@ -297,6 +297,8 @@ void MainWindow::on_restart_button_clicked() {
             runestones[i][j]->change_color("empty", 0);
         }
     }
+    attack_wait_count = -1;
+    level = 1;
     move_free = false;
     init_hp = 2000;
     icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
@@ -317,14 +319,9 @@ void MainWindow::on_restart_button_clicked() {
     skill_text->show();
     skill_text->setText("");
     for (int i = 0; i < 6; i++) {
-        charac_slots[i]->charac_item->hide();
-        delete charac_slots[i];
-        charac_slots[i] = new Charac_slot(this);
-        charac_slots[i]->charac_item->setFixedWidth(90);
-        charac_slots[i]->charac_item->setFixedHeight(90);
+        charac_slots[i]->reset();
         charac_slots[i]->charac_item->move(0 + i * 90, 360);
         charac_slots[i]->attack_text->move(25 + i * 90, 315);
-        charac_slots[i]->charac_item->show();
     }
     for (int i = 0; i < 3; i++){
         delete enemy[i];
@@ -514,8 +511,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         }
         // 正常轉珠
         else if (event->y() >= 510) {
-            icon_bar->heal_text->setStyleSheet("color: lime");
-            icon_bar->heal_text->hide();
             if (can_move_runestone) {
                 runestone_selected = true;
                 selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
@@ -739,7 +734,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             return;
         }
         if (attack_wait_count == -1){ // 不攻擊，乘上combo數
-            if (!basic) combo *= 0.5;
+            if (!basic && combo != 1) combo *= 0.5;
             attack_wait_count ++;
             for(int i = 0; i < int(charac_slots.size()); i++){
                 if (charac_slots[i]->attack == 0) continue;
@@ -747,7 +742,6 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 if (!basic){ // 隊長、技能額外倍率
                     if (charac_slots[0]->charac_ID < 5) charac_slots[i]->attack *= 2;
                     charac_slots[i]->attack *= charac_slots[i]->extra_atk;
-                    qDebug()<<"hi"<<charac_slots[i]->extra_atk;
                 }
                 charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
             }
@@ -895,11 +889,6 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
         }
 
-        // 啟動燃燒軌跡
-        if (level == 3){
-            burn_road = true;
-        }
-
         if (level == 1 || level == 2){ //敵人全滅
             if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead){
                 level++;
@@ -931,6 +920,11 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 }
 
             }
+        }
+
+        // 啟動燃燒軌跡
+        if (level == 3){
+            burn_road = true;
         }
 
         // 燃燒指定位置
@@ -999,7 +993,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             icon_bar->heal_text->show();
             icon_bar->heal_text->setText("-" + QString::number(harm));
         }
-        if (hp <= 0 ){
+        if (hp <= 0){
             game_over();
         }
 
@@ -1007,12 +1001,13 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             for (int i=0;i<5;i++) runestones[i][0]->change_color("heart", runestones[i][0]->status);
 
         if (game_status != 5){ // gameover = 5
-            if (weather_amount != 0) { // 風化符石延遲動畫
+            if (weather_amount != 0 || harm != 0) { // 風化符石或受傷延遲動畫
                 QTimer::singleShot(1000, [&](){
                     // 畫面亮回，準備下一局
                     darken->hide();
                     heal = 0;
                     harm = 0;
+                    icon_bar->heal_text->setStyleSheet("color: lime");
                     icon_bar->heal_text->hide();
 
                     // 檢查技能好了嗎
@@ -1033,7 +1028,6 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 darken->hide();
                 heal = 0;
                 harm = 0;
-                icon_bar->heal_text->hide();
 
                 // 檢查技能好了嗎
                 for (int i=0; i < int(charac_slots.size()); i++){

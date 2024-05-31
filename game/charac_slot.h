@@ -26,6 +26,7 @@ public:
     void add_attack(Runestone_pair rp);
     void new_round();
     void CD_reset();
+    void reset();
 
     vector <int> charac_heal;
     vector <int> charac_hp;
