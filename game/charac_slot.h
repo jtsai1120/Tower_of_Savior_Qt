@@ -35,6 +35,8 @@ public:
     int attack = 0;
     QString attribute; //紀錄角色屬性
 
+    int hit_more;
+
 private:
     QPixmap empty_slot;
     vector <QPixmap> charac_pics;

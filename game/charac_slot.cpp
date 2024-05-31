@@ -37,10 +37,11 @@ Charac_slot::Charac_slot(QWidget *parent){
     charac_hp = {600, 300, 450, 350, 180,
                  380, 500, 800, 450, 620};
     charac_CD = {-1, -1, -1, -1, -1,
-                 8, 4, 6, -1, -1};
+                 8, 4, 6, 7, 8};
     CD = -1;
     skill_power = -1;
     extra_atk = 1;
+    hit_more = -1;
 
     charac_pics.resize(paths.size());
     for (int i = 0; i < int(paths.size()); i++){
@@ -116,9 +117,6 @@ void Charac_slot::add_attack(Runestone_pair rp){
                 qDebug()<< "all_atk = "<<all_atk;
             }
         }
-        if (leader == 9){
-            attack *= 1.3; // 每次combo效果 +30%
-        }
     }
 
     if (skill_power == 6)
@@ -137,11 +135,13 @@ void Charac_slot::new_round(){
 void Charac_slot::CD_reset(){
     CD = charac_CD[charac_ID];
     skill_power = charac_ID;
+    qDebug()<<"character"<<(charac_ID+1)<<"skill activated";
 }
 
 void Charac_slot::reset(){
     leader = -1;
     charac_ID = -1;
+    hit_more = -1;
     CD = -1;
     skill_power = -1;
     extra_atk = 1;
