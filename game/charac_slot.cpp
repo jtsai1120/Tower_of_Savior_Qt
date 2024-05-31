@@ -30,12 +30,17 @@ Charac_slot::Charac_slot(QWidget *parent){
         {"light"},
     };
 
-    charac_atk = {80, 220, 120, 130, 280, 330, 280, 180, 260, 230};
-    charac_heal = {20, 2, 15, 11, 8, 12, 24, 48, 30, 40};
-    charac_hp = {600, 300, 450, 350, 180, 400, 500, 800, 450, 620};
-    charac_CD = {-1, -1, -1, -1, -1, 8, -1, -1, -1, -1};
-
+    charac_atk = {80, 220, 120, 130, 280,
+                  330, 280, 180, 260, 230};
+    charac_heal = {20, 2, 15, 11, 8,
+                   12, 24, 48, 30, 37};
+    charac_hp = {600, 300, 450, 350, 180,
+                 380, 500, 800, 450, 620};
+    charac_CD = {-1, -1, -1, -1, -1,
+                 8, 4, 6, -1, -1};
     CD = -1;
+    skill_power = -1;
+    extra_atk = 1;
 
     charac_pics.resize(paths.size());
     for (int i = 0; i < int(paths.size()); i++){
@@ -56,7 +61,8 @@ void Charac_slot::change_charac(int is_lead, bool is_basic){
     basic = is_basic;
     leader = is_lead;
 
-    if (charac_ID + 1 < int(charac_pics.size()))
+    if (charac_ID == -1) charac_ID = 5;
+    else if (charac_ID + 1 < int(charac_pics.size()))
         charac_ID++;
     else
         charac_ID = 0;
@@ -80,38 +86,56 @@ void Charac_slot::change_charac(int is_lead, bool is_basic){
 
 
 void Charac_slot::add_attack(Runestone_pair rp){
+    int temp_atk = charac_atk[charac_ID];
+    if (skill_power == 5)
+        temp_atk *= 3;
+
     QString clr = rp.color;
     if (charac_clr[charac_ID] == clr){
         if(basic) attack += rp.pair.size();
-        else attack += charac_atk[charac_ID] * rp.pair.size();
-        if (rp.pair.size() > 5)
+        else attack += temp_atk * rp.pair.size();
+        if (rp.pair.size() > 4)
             all_atk = true;
         qDebug()<< "all_atk = "<<all_atk;
     }
     else if (!basic){
         if (leader == 5){
-            if ((charac_clr[charac_ID] == "water" || charac_clr[charac_ID] == "fire" || charac_clr[charac_ID] == "dark")
-                    && (clr == "water" || clr == "fire" || clr == "dark")){
-                if(basic) attack += rp.pair.size();
-                else attack += charac_atk[charac_ID] * rp.pair.size();
-                if (rp.pair.size() > 5)
+            if ((charac_clr[charac_ID] == "water" || charac_clr[charac_ID] == "earth" || charac_clr[charac_ID] == "dark")
+                    && (clr == "water" || clr == "earth" || clr == "dark")){
+                attack += temp_atk * rp.pair.size();
+                if (rp.pair.size() > 4)
+                    all_atk = true;
+                qDebug()<< "all_atk = "<<all_atk;
+            }
+        }
+        if (leader == 6){
+            if (clr == "heart"){
+                attack += temp_atk * rp.pair.size();
+                if (rp.pair.size() > 4)
                     all_atk = true;
                 qDebug()<< "all_atk = "<<all_atk;
             }
         }
         if (leader == 9){
-            attack *= 1.3; // combo效果 +30%
+            attack *= 1.3; // 每次combo效果 +30%
         }
     }
+
+    if (skill_power == 6)
+        if (clr == "heart")
+            extra_atk += rp.pair.size();
 }
 
 void Charac_slot::new_round(){
     attack = 0;
     if (CD > 0) CD--;
+    skill_power = -1;
+    extra_atk = 1;
     all_atk = false;
 }
 
 void Charac_slot::CD_reset(){
     CD = charac_CD[charac_ID];
+    skill_power = charac_ID;
 }
 

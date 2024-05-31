@@ -132,15 +132,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     darken_pic = darken_pic.scaled(1000, 510);
 
     darken->setPixmap(darken_pic);
-    darken->move(0, 1000);
+    darken->hide();
+    darken->move(0, 510);
     darken->setFixedSize(darken_pic.width(), darken_pic.height());
 
     // 設計成半透明
-    // Create an opacity effect
     darken_opacityEffect = new QGraphicsOpacityEffect;
-    // Set the desired opacity (0.0 = fully transparent, 1.0 = fully opaque)
     darken_opacityEffect->setOpacity(0.5); // 50% transparency
-    // Apply the opacity effect to the label
     darken->setGraphicsEffect(darken_opacityEffect);
 
     // 設定介面
@@ -242,6 +240,8 @@ void MainWindow::on_start_button_clicked() {
     init_hp = 0;
     harm = 0;
     for (int i = 0; i < 6; i++) {
+        if (!basic) charac_slots[i]->attack_text->move(10 + i * 90, 315);
+
         if(charac_slots[i]->charac_ID == -1)
             charac_slots[i]->charac_item->move(0, 1000); // 只是移出螢幕
         else {
@@ -256,14 +256,13 @@ void MainWindow::on_start_button_clicked() {
     if (charac_slots[0]->charac_ID > 4){
         init_hp *= 1.5;
     }
-    icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
 
     // 基礎模式則置成1
     if (basic){
         init_heal = 5;
         init_hp = 2000;
     }
-
+    icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
     icon_bar->heal_text->hide();
     hp = init_hp;
     burn_road = false;
@@ -298,6 +297,12 @@ void MainWindow::on_restart_button_clicked() {
             runestones[i][j]->change_color("empty", 0);
         }
     }
+    move_free = false;
+    init_hp = 2000;
+    icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
+    icon_bar->heal_text->setText("+0");
+    icon_bar->heal_text->setStyleSheet("color: lime");
+    basic = true;
     full_darken->hide();
     gameover_text->hide();
     restart_button->hide();
@@ -312,6 +317,7 @@ void MainWindow::on_restart_button_clicked() {
     skill_text->show();
     skill_text->setText("");
     for (int i = 0; i < 6; i++) {
+        charac_slots[i]->charac_item->hide();
         delete charac_slots[i];
         charac_slots[i] = new Charac_slot(this);
         charac_slots[i]->charac_item->setFixedWidth(90);
@@ -463,12 +469,12 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             if (charac_slots[event->x() / 90]->CD == 0){
                 if (charac_slots[event->x() / 90]->charac_ID == 5){
                     for (int i=0; i<5; i++){
-                        runestones[i][0]->change_color("dark", 0);
-                        runestones[i][1]->change_color("water", 0);
-                        runestones[i][2]->change_color("fire", 0);
-                        runestones[i][3]->change_color("dark", 0);
-                        runestones[i][4]->change_color("water", 0);
-                        runestones[i][5]->change_color("fire", 0);
+                        runestones[i][0]->change_color("dark", runestones[i][0]->status);
+                        runestones[i][1]->change_color("water", runestones[i][1]->status);
+                        runestones[i][2]->change_color("earth", runestones[i][2]->status);
+                        runestones[i][3]->change_color("dark", runestones[i][3]->status);
+                        runestones[i][4]->change_color("water", runestones[i][4]->status);
+                        runestones[i][5]->change_color("earth", runestones[i][5]->status);
                     }
                     // 關閉燃燒路徑的位置
                     for (int i = 0; i < int(runestones.size()); i++){
@@ -478,12 +484,38 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                     }
                     burn_road = false;
                 }
+                if (charac_slots[event->x() / 90]->charac_ID == 6)
+                    for (int i=3; i<6; i++)
+                        runestones[2][i]->change_color("heart", runestones[2][i]->status);
+                if (charac_slots[event->x() / 90]->charac_ID == 7) {
+                    move_free = true;
+                    if ((event->x() / 90) == 0){
+                        if (charac_slots[5]->CD>0)charac_slots[5]->CD--;
+                        if (charac_slots[1]->CD>0)charac_slots[1]->CD--;
+                    }
+                    else if ((event->x() / 90) == 5){
+                        if (charac_slots[4]->CD>0)charac_slots[4]->CD--;
+                        if (charac_slots[0]->CD>0)charac_slots[0]->CD--;
+                    }
+                    else{
+                        if (charac_slots[(event->x() / 90) + 1]->CD>0)charac_slots[(event->x() / 90) + 1]->CD--;
+                        if (charac_slots[(event->x() / 90) - 1]->CD>0)charac_slots[(event->x() / 90) - 1]->CD--;
+                    }
+                    // 檢查技能好了嗎
+                    for (int i=0; i < int(charac_slots.size()); i++){
+                        if (charac_slots[i]->CD == 0){
+                            charac_slots[i]->charac_item->move(0 + i * 90, 350);
+                        }
+                    }
+                }
                 charac_slots[event->x() / 90]->CD_reset();
                 charac_slots[event->x() / 90]->charac_item->move(0 + (event->x() / 90) * 90, 360);
             }
         }
         // 正常轉珠
         else if (event->y() >= 510) {
+            icon_bar->heal_text->setStyleSheet("color: lime");
+            icon_bar->heal_text->hide();
             if (can_move_runestone) {
                 runestone_selected = true;
                 selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
@@ -497,10 +529,27 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
     if (game_status == 0)
         return;
     if (game_status == 1 && event->button() == Qt::LeftButton) {
+        // 關閉燃燒路徑的位置
+        for (int i = 0; i < int(runestones.size()); i++){
+            for (int j = 0; j < int(runestones[i].size()); j++){
+                if (runestones[i][j]->status == 1) runestones[i][j]->change_color(runestones[i][j]->get_color(), 0);
+            }
+        }
+        // 還原本來就有燃燒的位置
+        if (!basic && level == 2){
+            if (enemy[0]->dead == false){
+                runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+                runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
+            }
+            if (enemy[2]->dead == false){
+                runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
+                runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
+            }
+        }
         runestone_selected = false;
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
         runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1);
-        if (runestone_drift) {
+        if (runestone_drift && !move_free) {
             // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
             drift_timer->stop();
             drift_timer_started = false;
@@ -649,19 +698,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 combo_text->hide();
                 can_move_runestone = true;
 
-                // 關閉燃燒路徑的位置
-                for (int i = 0; i < int(runestones.size()); i++){
-                    for (int j = 0; j < int(runestones[i].size()); j++){
-                        if (runestones[i][j]->status == 1) runestones[i][j]->change_color(runestones[i][j]->get_color(), 0);
-                    }
-                }
-                // 還原本來就有燃燒的位置
-                for (int i = 0; i < int(burning.size()); i++){
-                    runestones[burning[i].first][burning[i].second]->change_color(runestones[burning[i].first][burning[i].second]->get_color(), 1);
-                }
-
                 // 暗下畫面
-                darken->move(0, 510);
+                darken->show();
                 darken->raise();
 
                 // 我方攻擊階段
@@ -706,12 +744,21 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             for(int i = 0; i < int(charac_slots.size()); i++){
                 if (charac_slots[i]->attack == 0) continue;
                 charac_slots[i]->attack *= combo;
-                if (!basic) // 隊長技能額外倍率
+                if (!basic){ // 隊長、技能額外倍率
                     if (charac_slots[0]->charac_ID < 5) charac_slots[i]->attack *= 2;
+                    charac_slots[i]->attack *= charac_slots[i]->extra_atk;
+                    qDebug()<<"hi"<<charac_slots[i]->extra_atk;
+                }
                 charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
             }
             heal *= combo;
             icon_bar->heal_text->setText("+" + QString::number(heal));
+
+            // 回復血量
+            hp += heal;
+            if (hp > init_hp) hp = init_hp;
+            icon_bar->change_status("hp", 1.0 - hp/init_hp);
+            icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
 
             combo_cd->start(90);
             return;
@@ -821,9 +868,37 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
     } else if (game_status == 3){ // 結算準備下一局
         attack_wait_count = -1;
         burn_road = false;
+        harm = 0;
+        icon_bar->heal_text->hide();
 
-        hp += heal;
-        if (hp > init_hp) hp = init_hp;
+        // 風化指定符石位置
+        int weather_amount = 0;
+        if (level == 2 && enemy[1]->dead == false){
+            //QSound::play(":/dataset/setting_select.wav");
+            vector<int> sel;
+            for (int row = 0; row < 5; row++)
+                for (int col = 0; col < 6; col++)
+                    if (runestones[row][col]->status == 0)
+                        sel.push_back(row*6+col);
+            uniform_int_distribution<> _dist(0, int(sel.size())-1);
+            vector<bool> seled(int(sel.size()), false);
+            int rd_num;
+            for (int i = 0; i < 2; i++) {
+                weather_amount++;
+                do {
+                    rd_num = _dist(gen);
+                } while(seled[rd_num]);
+                seled[rd_num] = true;
+                int row = sel[rd_num] / 6;
+                int col = sel[rd_num] % 6;
+                runestones[row][col]->change_color(runestones[row][col]->get_color(), 2);
+            }
+        }
+
+        // 啟動燃燒軌跡
+        if (level == 3){
+            burn_road = true;
+        }
 
         if (level == 1 || level == 2){ //敵人全滅
             if (enemy[0]->dead && enemy[1]->dead && enemy[2]->dead){
@@ -858,6 +933,22 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
         }
 
+        // 燃燒指定位置
+        if (!basic && level == 2){
+            if (enemy[0]->dead == false){
+                burning.push_back({0, 0});
+                burning.push_back({0, 5});
+                runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+                runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
+            }
+            if (enemy[2]->dead == false){
+                burning.push_back({4, 0});
+                burning.push_back({4, 5});
+                runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
+                runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
+            }
+        }
+
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd > 0)
                 enemy[i]->cd--;
@@ -876,14 +967,14 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             if (enemy[i]->cd == 0){
                 if (level == 1){
                     if (enemy[i]->dead == false){
-                        hp = hp - enemy[i]->attack * magnify;
+                        harm += enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd_reset(level);
                     }
                 }
                 if (level == 2){
                     if (enemy[i]->dead == false){
-                        hp = hp - enemy[i]->attack * magnify;
+                        harm += enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd_reset(level);
                     }
@@ -893,65 +984,33 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
         if (level == 3){
             if (enemy[0]->dead == false && enemy[0]->cd == 0){
-                hp = hp - enemy[0]->attack * magnify;
+                harm += enemy[0]->attack * magnify;
                 qDebug()<<"enemy attack!";
                 enemy[0]->cd_reset(level);
             }
+        }
+
+        hp -= harm;
+        move_free = false;
+
+        // 扣血傷害
+        if (harm){
+            icon_bar->heal_text->setStyleSheet("color: red");
+            icon_bar->heal_text->show();
+            icon_bar->heal_text->setText("-" + QString::number(harm));
         }
         if (hp <= 0 ){
             game_over();
         }
 
-        // 風化指定符石位置
-        int weather_amount = 0;
-        if (level == 2 && enemy[1]->dead == false){
-            //QSound::play(":/dataset/setting_select.wav");
-            vector<int> sel;
-            for (int row = 0; row < 5; row++)
-                for (int col = 0; col < 6; col++)
-                    if (runestones[row][col]->status == 0)
-                        sel.push_back(row*6+col);
-            uniform_int_distribution<> _dist(0, int(sel.size())-1);
-            vector<bool> seled(int(sel.size()), false);
-            int rd_num;
-            for (int i = 0; i < 2; i++) {
-                weather_amount++;
-                do {
-                    rd_num = _dist(gen);
-                } while(seled[rd_num]);
-                seled[rd_num] = true;
-                int row = sel[rd_num] / 6;
-                int col = sel[rd_num] % 6;
-                runestones[row][col]->change_color(runestones[row][col]->get_color(), 2);
-            }
-        }
+        if (charac_slots[0]->charac_ID == 6)
+            for (int i=0;i<5;i++) runestones[i][0]->change_color("heart", runestones[i][0]->status);
 
-        // 燃燒指定位置
-        if (!basic && level == 2){
-            if (enemy[0]->dead == false){
-                burning.push_back({0, 0});
-                burning.push_back({0, 5});
-                runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
-                runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
-            }
-            if (enemy[2]->dead == false){
-                burning.push_back({4, 0});
-                burning.push_back({4, 5});
-                runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
-                runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
-            }
-        }
-
-        // 啟動燃燒軌跡
-        if (level == 3){
-            burn_road = true;
-        }
-
-        if (game_status != 5){ //gameover = 5
-            if (weather_amount != 0) {
+        if (game_status != 5){ // gameover = 5
+            if (weather_amount != 0) { // 風化符石延遲動畫
                 QTimer::singleShot(1000, [&](){
                     // 畫面亮回，準備下一局
-                    darken->move(0, 1000);
+                    darken->hide();
                     heal = 0;
                     harm = 0;
                     icon_bar->heal_text->hide();
@@ -971,7 +1030,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 });
             } else {
                 // 畫面亮回，準備下一局
-                darken->move(0, 1000);
+                darken->hide();
                 heal = 0;
                 harm = 0;
                 icon_bar->heal_text->hide();
@@ -1002,7 +1061,7 @@ void MainWindow::combo_count() {
         combo_cd->start(190); // start again
 
         // 暗下畫面
-        darken->move(0, 510);
+        darken->show();
         darken->raise();
 
         // 關閉燃燒路徑的位置
@@ -1012,8 +1071,13 @@ void MainWindow::combo_count() {
             }
         }
         // 還原本來就有燃燒的位置
-        for (int i = 0; i < int(burning.size()); i++){
-            runestones[burning[i].first][burning[i].second]->change_color(runestones[burning[i].first][burning[i].second]->get_color(), 1);
+        if (enemy[0]->dead == false){
+            runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+            runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
+        }
+        if (enemy[2]->dead == false){
+            runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
+            runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
         }
 
         return;

@@ -20,6 +20,8 @@ public:
     void change_charac(int is_lead, bool basic);
     int charac_ID;
     int CD;
+    int skill_power;
+    int extra_atk;
 
     void add_attack(Runestone_pair rp);
     void new_round();
