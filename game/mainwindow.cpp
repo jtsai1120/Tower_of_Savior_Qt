@@ -424,7 +424,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         // 更換任務
         if (event->x() >= 10 && event->x() <= 190 && event->y() >= 520 && event->y() <= 603) {
             if (basic){
-                skill_text->setText("Mission 2:\n  關卡1: 無技能\n  關卡二: 燃燒/隨機風化/燃燒\n  關卡三: 燃燒軌跡");
+                skill_text->setText("Mission 2:\n  關卡1: 無技能\n  關卡二: 燃燒/隨機風化/燃燒\n  關卡三: 10+combo追擊、 燃燒軌跡");
                 basic = false;
                 ui_text->setText("Mission 2");
             }
@@ -491,6 +491,20 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         // 開啟技能
         else if (event->y() >= 350 && event->y() <= 440) {
             if (charac_slots[event->x() / 90]->CD == 0){
+                if (charac_slots[event->x() / 90]->charac_ID< 5){
+                    for (int i=0; i<3; i++){
+                        runestones[0][i]->change_color("water", 0);
+                        runestones[1][i]->change_color("fire", 0);
+                        runestones[2][i]->change_color("earth", 0);
+                        runestones[3][i]->change_color("light", 0);
+                        runestones[4][i]->change_color("dark", 0);
+                        runestones[0][i+3]->change_color("dark", 0);
+                        runestones[1][i+3]->change_color("water", 0);
+                        runestones[2][i+3]->change_color("fire", 0);
+                        runestones[3][i+3]->change_color("earth", 0);
+                        runestones[4][i+3]->change_color("light", 0);
+                    }
+                }
                 if (charac_slots[event->x() / 90]->charac_ID == 5){
                     for (int i=0; i<5; i++){
                         runestones[i][0]->change_color("dark", runestones[i][0]->status);
@@ -776,7 +790,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             return;
         }
         if (attack_wait_count == -1){ // 不攻擊，乘上combo數
-            if (!basic && combo > 1) combo *= 0.5;
+            double combo_power = 1;
+            if (!basic && combo > 1) combo_power = combo * 0.5;
             int more_multi = 1; // 全隊倍率
 
             if (!basic){
@@ -793,7 +808,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         double_combo = false;
                     }
                 }
-                charac_slots[i]->attack *= combo;
+                charac_slots[i]->attack *= combo_power;
                 if (!basic){ // 隊長、技能額外倍率
                     charac_slots[i]->attack *= more_multi;
                     charac_slots[i]->attack *= charac_slots[i]->extra_atk;
@@ -814,7 +829,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     }
                 }
             }
-            heal *= combo;
+            heal *= combo_power;
             icon_bar->heal_text->setText("+" + QString::number(heal));
 
             // 回復血量
@@ -874,6 +889,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
 
             // 角色8的技能
             if (charac_slots[attack_wait_count]->skill_power == 7) advantage_attribute = 2;
+            if (charac_slots[attack_wait_count]->skill_power >= 0 &&
+                    charac_slots[attack_wait_count]->skill_power <= 4) advantage_attribute = 2;
+
             damage = advantage_attribute * charac_slots[attack_wait_count]->attack;
             qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
 
@@ -882,6 +900,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             //Bullet shot(startpoint,endpoint);
             //shot.show();
             if (!basic) damage *= 0.001;
+            if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
+
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
@@ -1038,6 +1058,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         if (level == 3){
             if (enemy[0]->dead == false && enemy[0]->cd == 0){
                 harm += enemy[0]->attack * magnify;
+                if (!basic && (combo < 10)) harm *= (10 - combo); // 追擊
                 qDebug()<<"enemy attack!";
                 enemy[0]->cd_reset(level);
             }

@@ -36,7 +36,7 @@ Charac_slot::Charac_slot(QWidget *parent){
                    12, 24, 48, 30, 37};
     charac_hp = {600, 300, 450, 350, 180,
                  380, 500, 800, 450, 620};
-    charac_CD = {-1, -1, -1, -1, -1,
+    charac_CD = {5, 5, 5, 5, 5,
                  8, 4, 6, 7, 8};
     CD = -1;
     skill_power = -1;
