@@ -17,8 +17,6 @@ public:
 
     void cd_reset(int level);
 
-    void new_round();
-
     vector <int> charac_heal;
     //vector <int> charac_hp;
 

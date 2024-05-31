@@ -26,6 +26,7 @@ public:
     int current_length;
     int max_length = 90;
     void changeImageColor(int level, int enemy);
+    void reset();
 
 };
 

@@ -297,6 +297,12 @@ void MainWindow::on_restart_button_clicked() {
             runestones[i][j]->change_color("empty", 0);
         }
     }
+    harm = 0; // 所受傷害
+    burn_road = false; // 燃燒軌跡技能生效
+    move_free = false; // 排珠
+    damage = 0;
+    burning.clear();
+    survive = {0,1,2};
     attack_wait_count = -1;
     level = 1;
     move_free = false;
@@ -323,19 +329,18 @@ void MainWindow::on_restart_button_clicked() {
         charac_slots[i]->charac_item->move(0 + i * 90, 360);
         charac_slots[i]->attack_text->move(25 + i * 90, 315);
     }
+    //set enemy and hp
+    enemy.resize(3);
+    enemy_hp.resize(3);
     for (int i = 0; i < 3; i++){
-        delete enemy[i];
-        delete enemy_hp[i];
-        enemy[i] = new Enemy(this);
         enemy[i]->enemy_item->setFixedWidth(120);
         enemy[i]->enemy_item->setFixedHeight(120);
         enemy[i]->enemy_item->move(0,1000);
-        enemy[i]->enemy_item->show();
         enemy[i]->show(1,i);
-
-        enemy_hp[i] = new Enemy_hp(this);
         enemy_hp[i]->changeImageColor(1,i);
         enemy_hp[i]->hp_bar->move(0,1000);
+        enemy[i]->enemy_item->show();
+        enemy_hp[i]->reset(level,i);
         enemy_hp[i]->hp_bar->show();
     }
     can_move_runestone = true;
@@ -710,6 +715,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 ui_text->show();
                 ui_text->setText("Wave 0" + QString::number(level + 1) + "/ 03");
                 if (level == 3){ // 結束了
+                    enemy[2]->enemy_item->hide();
                     ui_text->setText("  VICTORY!");
                     bg->battle_bgm->stop();
                     bg->win_bgm->play();
