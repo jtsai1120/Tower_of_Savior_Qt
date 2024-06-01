@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     skill_text->resize(2000, 300);
     skill_text->move(32, 580);
     skill_text->show();
-    skill_text->setText("Mission 1:\n  關卡1: 無技能\n  關卡二: 回合結束隨機風化\n  關卡三: 燃燒軌跡");
+    //skill_text->setText("Mission 1:\n  關卡1: 無技能\n  關卡二: 回合結束隨機風化\n  關卡三: 燃燒軌跡");
 
     gameover_text = new QLabel(this);
     QFontDatabase::addApplicationFont(":/dataset/Survival Instinx");
@@ -65,6 +65,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     gameover_text->move(50, -250);
     gameover_text->setText("Game Over");
     gameover_text->hide();
+
+    cd_text1 = new QLabel(this);
+    QFont cd1_text_font("Consolas", 10);
+    cd_text1->setFont(cd1_text_font);
+    cd_text1->setStyleSheet("color: white");
+    cd_text1->resize(200, 200);
+    cd_text2 = new QLabel(this);
+    cd_text2->setFont(cd1_text_font);
+    cd_text2->setStyleSheet("color: white");
+    cd_text2->resize(200, 200);
+    cd_text3 = new QLabel(this);
+    cd_text3->setFont(cd1_text_font);
+    cd_text3->setStyleSheet("color: white");
+    cd_text3->resize(200, 200);
+
+
 
     // 頂部角色設置欄位
     charac_slots.resize(6);
@@ -229,6 +245,16 @@ void MainWindow::on_start_button_clicked() {
         enemy[i]->enemy_item->move(85 +  130*i, 200);
         enemy_hp[i]->hp_bar->move(100 +  133*i, 330);
     }
+    cd_text1->move(70,150);
+    cd_text1->show();
+    cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
+    cd_text2->move(210,150);
+    cd_text2->show();
+    cd_text2->setText("CD" +  QString::number(enemy[1]->cd));
+    cd_text3->move(345,150);
+    cd_text3->show();
+    cd_text3->setText("CD" +  QString::number(enemy[2]->cd));
+
 
     setting->show();
 
@@ -905,6 +931,10 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
+            charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
+            charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
+            show_damage(charac_slots[attack_wait_count]->damage_text, 500);
+
             enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
             if ((enemy[attack_enemy]->hp) <= 0){
                 enemy[attack_enemy]->dead = true;
@@ -1042,14 +1072,14 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     if (enemy[i]->dead == false){
                         harm += enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
-                        enemy[i]->cd_reset(level);
+                        enemy[i]->cd = 3;
                     }
                 }
                 if (level == 2){
                     if (enemy[i]->dead == false){
                         harm += enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
-                        enemy[i]->cd_reset(level);
+                        enemy[i]->cd = 3;
                     }
                 }
             }
@@ -1060,8 +1090,19 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 harm += enemy[0]->attack * magnify;
                 if (!basic && (combo < 10)) harm *= (10 - combo); // 追擊
                 qDebug()<<"enemy attack!";
-                enemy[0]->cd_reset(level);
+                enemy[0]->cd = 5;
             }
+        }
+        if (level == 1 || level == 2){
+            cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
+            cd_text2->setText("CD" +  QString::number(enemy[1]->cd));
+            cd_text3->setText("CD" +  QString::number(enemy[2]->cd));
+        }
+        else if (level == 3){
+            cd_text1->move(130,40);
+            cd_text2->hide();
+            cd_text3->hide();
+            cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
         }
 
         hp -= harm;
@@ -1324,4 +1365,17 @@ void MainWindow::game_over(){
 
     restart_button->show();
     restart_button->raise();
+}
+
+void MainWindow::show_damage(QLabel *text, int seconds){
+    QTimer *timer = new QTimer(text); // 设置parent以便自动清理
+
+   // 连接QTimer的timeout信号到lambda函数，用于隐藏label
+   QObject::connect(timer, &QTimer::timeout, [text, timer]() {
+       text->hide();  // 隐藏文本
+       timer->deleteLater();  // 删除定时器
+   });
+
+   // 启动QTimer，设置延迟时间为milliseconds毫秒
+   timer->start(seconds);
 }

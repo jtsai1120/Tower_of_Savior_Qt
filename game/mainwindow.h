@@ -43,6 +43,7 @@ public:
     void combo_count();
     void drop_detect();
     void game_over();
+    void show_damage(QLabel *text, int seconds);
 
     int level = 1;
 
@@ -126,8 +127,12 @@ private:
 
     QLabel *ui_text;
     QLabel *skill_text;
-
+    QLabel *cd_text1;
+    QLabel *cd_text2;
+    QLabel *cd_text3;
     QLabel *gameover_text;
+
+    vector<vector<int>> damage_text_pos = {{10,10},{15,20},{-50,-30},{-27,-47},{36,-20},{-18,30}};
 
     // 設定介面
     QPixmap setting_pic;
@@ -164,16 +169,16 @@ private:
     bool double_combo; // combo兩倍技能效果
 
     vector<QString> skill_descript = {
-        {"元素爆擊 CD 5\n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
-        {"元素爆擊 CD 5\n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
-        {"元素爆擊 CD 5\n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
-        {"元素爆擊 CD 5\n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
-        {"元素爆擊 CD 5\n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
-        {"我要證明，我們並沒有錯! CD 8\n  轉換固定版面，\n  一回合內atk 3倍，消除所有燃燒效果\n\n隊長技能: 水木暗互相兼具，hp 1.5倍"},
-        {"錯的人是我。 CD 4\n  根據消除的心數量向上提升atk\n\n隊長技能: 心兼具所有屬性效果，\n  回合開始轉換固定位置心，hp 1.5倍"},
-        {"不要再叫我騙子了! CD 6\n  一回合內排珠，自身必定剋制，\n  身旁隊友CD-1"},
-        {"你們再吵架我就退出! CD 6\n  combo數 2倍及額外追擊2次，\n  效果持續至自身沒有攻擊"},
-        {"因此我也需要搖滾。 CD 8\n  全隊atk 2倍，免疫\n  燃燒轉回血\n\n隊長技能: 所有人跟隨最高atk, hp1.5倍"},
+        {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
+        {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
+        {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
+        {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
+        {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
+        //{"我要證明，我們並沒有錯! CD 8 \n  轉換固定版面，\n  一回合內atk 3倍，消除所有燃燒效果\n\n隊長技能: 水木暗互相兼具，hp 1.5倍"},
+        //{"錯的人是我。 CD 4 \n  根據消除的心數量向上提升atk\n\n隊長技能: 心兼具所有屬性效果，\n  回合開始轉換固定位置心，hp 1.5倍"},
+        //{"不要再叫我騙子了! CD 6 \n  一回合內排珠，自身必定剋制，\n  身旁隊友CD-1"},
+        //{"你們再吵架我就退出! CD 6 \n  combo數 2倍及額外追擊2次，\n  效果持續至自身沒有攻擊"},
+        //{"因此我也需要搖滾。 CD 8 \n  全隊atk 2倍，免疫\n  燃燒轉回血\n\n隊長技能: 所有人跟隨最高atk, hp1.5倍"},
     };
 };
 

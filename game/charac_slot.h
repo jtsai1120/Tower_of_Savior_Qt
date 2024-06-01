@@ -35,6 +35,8 @@ public:
     int attack = 0;
     QString attribute; //紀錄角色屬性
 
+    QLabel *damage_text;
+
     int hit_more;
 
 private:

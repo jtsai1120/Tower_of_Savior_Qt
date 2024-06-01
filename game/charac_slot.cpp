@@ -56,6 +56,14 @@ Charac_slot::Charac_slot(QWidget *parent){
     QFont attack_text_font("Consolas", 15, QFont::Bold);
     attack_text->setFont(attack_text_font);
     attack_text->resize(200, 200);
+
+    damage_text = new QLabel(parent);
+    QFont damage_text_font("Consolas", 10, QFont::Bold);
+    damage_text->setStyleSheet("color: white");
+    damage_text->setFont(damage_text_font);
+    damage_text->resize(200, 200);
+    damage_text->show();
+    damage_text->move(0,1000);
 }
 
 void Charac_slot::change_charac(int is_lead, bool is_basic){
