@@ -2,29 +2,25 @@
 #define BULLET_H
 
 #include <QWidget>
-#include <QTimer>
-#include <QPoint>
+#include <QPointF>
 
 class Bullet : public QWidget {
     Q_OBJECT
 
 public:
-    Bullet(const QPoint &start, const QPoint &end, QWidget *parent = nullptr);
+    Bullet(QPointF start, QPointF end, QWidget *parent = nullptr);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private slots:
-    void updateArc();
+    void updateProgress();
+    void hideCurve();
 
 private:
-    int currentSpanAngle;
-    bool showArc;
-    QTimer *timer;
-    QPoint startPoint;
-    QPoint endPoint;
-    QRectF arcRect;
-    int startAngle;
+    QPointF start;
+    QPointF end;
+    qreal progress; // 记录绘制进度
 };
 
 #endif // BULLET_H

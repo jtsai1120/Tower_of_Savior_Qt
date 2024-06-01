@@ -16,6 +16,7 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <QApplication>
 
 #include "ButtonItem.h"
 #include "charac_slot.h"
@@ -124,6 +125,9 @@ private:
     // 燃燒位置
     vector<pair<int,int>> burning;
     vector<int> survive = {0,1,2};
+
+    //show bullet
+    vector<Bullet*> bullet;
 
     QLabel *ui_text;
     QLabel *skill_text;

@@ -1,45 +1,58 @@
 #include "bullet.h"
 #include <QPainter>
-#include <QtMath>
+#include <QTimer>
+#include <cmath>
 
-Bullet::Bullet(const QPoint &start, const QPoint &end, QWidget *parent)
-    : QWidget(parent), currentSpanAngle(0), showArc(true), startPoint(start), endPoint(end) {
-    setFixedSize(400, 400); // 你可以根据需要调整窗口大小
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
-    // 计算绘制弧线的矩形框和起始角度
-    qreal centerX = (start.x() + end.x()) / 2.0;
-    qreal centerY = (start.y() + end.y()) / 2.0;
-    qreal radius = qSqrt(qPow(end.x() - start.x(), 2) + qPow(end.y() - start.y(), 2)) / 2.0;
+Bullet::Bullet(QPointF start, QPointF end, QWidget *parent)
+    : QWidget(parent), start(start), end(end), progress(0) {
 
-    arcRect = QRectF(centerX - radius, centerY - radius, radius * 2, radius * 2);
-    startAngle = qRadiansToDegrees(qAtan2(start.y() - centerY, start.x() - centerX)) * 16;
+    // 计时器，用于更新绘制进度
+    QTimer *updateTimer = new QTimer(this);
+    connect(updateTimer, &QTimer::timeout, this, &Bullet::updateProgress);
+    updateTimer->start(30); // 每30ms更新一次绘制进度
 
-    // 设置定时器，每100ms更新一次弧线
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &Bullet::updateArc);
-    timer->start(100); // 每100ms触发一次
+    // 计时器，用于隐藏曲线
+    QTimer *hideTimer = new QTimer(this);
+    hideTimer->setSingleShot(true);
+    connect(hideTimer, &QTimer::timeout, this, &Bullet::hideCurve);
+    // 计算曲线绘制完成后，0.5秒开始隐藏曲线
+    connect(updateTimer, &QTimer::timeout, [this, hideTimer]() {
+        if (progress >= 1.0) {
+            hideTimer->start(500);
+        }
+    });
 }
 
 void Bullet::paintEvent(QPaintEvent *event) {
-    Q_UNUSED(event);
+    if (progress >= 1.0) return; // 绘制完成后不再重绘
 
-    if (showArc) {
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setPen(QPen(Qt::white, 2));
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
-        // 绘制弧线
-        painter.drawArc(arcRect, startAngle, currentSpanAngle);
+    // 根据进度绘制曲线
+    painter.setPen(QPen(Qt::black, 2));
+    QPainterPath path(start);
+    for (qreal t = 0; t <= progress; t += 0.01) {
+        qreal x = start.x() + (end.x() - start.x()) * t;
+        qreal y = start.y() + (end.y() - start.y()) * std::sin(M_PI * t); // 使用sin函数生成曲线
+        path.lineTo(x, y);
     }
+    painter.drawPath(path);
 }
 
-void Bullet::updateArc() {
-    currentSpanAngle += 16; // 每次增加16个单位（相当于1度）
-
-    if (currentSpanAngle >= 120 * 16) { // 如果弧线已经绘制完成
-        timer->stop(); // 停止定时器
-        showArc = false; // 隐藏弧线
+void Bullet::updateProgress() {
+    progress += 0.01;
+    if (progress >= 1.0) {
+        progress = 1.0;
     }
+    update();
+}
 
-    update(); // 触发重绘
+void Bullet::hideCurve() {
+    progress = 1.0;
+    update(); // 重绘以隐藏曲线
 }

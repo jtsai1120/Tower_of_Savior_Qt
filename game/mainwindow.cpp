@@ -7,6 +7,7 @@
 #include <ctime>
 #include <random>
 #include <QFontDatabase>
+#include <QPointF>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -108,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         enemy_hp[i]->changeImageColor(1,i);
         enemy_hp[i]->hp_bar->move(0,1000);
     }
+
 
     // 其他初始化
     seed = chrono::system_clock::now().time_since_epoch().count();
@@ -921,16 +923,15 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             damage = advantage_attribute * charac_slots[attack_wait_count]->attack;
             qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
 
-            //QPoint startpoint(charac_slots[attack_wait_count]->charac_item->x(),charac_slots[attack_wait_count]->charac_item->y());
-            //QPoint endpoint(enemy[attack_enemy]->enemy_item->x(),enemy[attack_enemy]->enemy_item->y());
-            //Bullet shot(startpoint,endpoint);
-            //shot.show();
+
+
             if (!basic) damage *= 0.001;
             if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
 
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
 
+            charac_slots[attack_wait_count]->damage_text->show();
             charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
             charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
             show_damage(charac_slots[attack_wait_count]->damage_text, 500);
@@ -1347,6 +1348,9 @@ void MainWindow::game_over(){
     full_darken->show();
     full_darken->raise();
     game_status = 5;
+    cd_text1->move(0,1000);
+    cd_text2->move(0,1000);
+    cd_text3->move(0,1000);
     for (int i = 0; i < int(runestones.size()); i++){
         for (int j = 0; j < int(runestones[i].size()); j++){
             runestones[i][j]->game_over_drop();
