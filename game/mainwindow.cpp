@@ -983,6 +983,12 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             if ((enemy[attack_enemy]->hp) <= 0){
                 enemy[attack_enemy]->dead = true;
                 enemy_hp[attack_enemy]->hp_bar->move(0,1000);
+                if (attack_enemy == 0)
+                    cd_text1->hide();
+                else if (attack_enemy == 1)
+                    cd_text2->hide();
+                else if (attack_enemy == 2)
+                    cd_text3->hide();
                 if (survive.size() > 0)
                     survive.erase(remove(survive.begin(), survive.end(), attack_enemy), survive.end());
                 else
@@ -1009,6 +1015,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
 
         combo_cd->start(190);
     } else if (game_status == 3){ // 結算準備下一局
+
+        for (int i = 0; i < 6; i++)
+            bullet[i]->bullet_item->hide();
 
         attack_wait_count = -1;
         burn_road = false;
@@ -1056,6 +1065,13 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         survive.push_back(1);
                         survive.push_back(2);
                         enemy[i]->cd = 3;
+                        cd_text1->show();
+                        cd_text2->show();
+                        cd_text3->show();
+                        cd_text1->move(70,120);
+                        cd_text2->move(210,120);
+                        cd_text3->move(345,120);
+
                     }
                     if (!basic) {
                         enemy[0]->cd = 1;
@@ -1074,6 +1090,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     enemy_hp[0]->hp_bar->move(140, 330);
                     survive.push_back(0);
                     enemy[0]->cd = 5;
+                    cd_text1->show();
                     if (!basic) enemy[0]->cd = 2;
                 }
 
@@ -1462,6 +1479,10 @@ void MainWindow::game_over(){
 
     restart_button->show();
     restart_button->raise();
+
+    for (int i = 0; i < 6; i++){
+        bullet[i]->bullet_item->hide();
+    }
 }
 
 void MainWindow::show_damage(QLabel *text, int seconds){
