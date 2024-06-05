@@ -43,3 +43,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     data.qrc
+
+DISTFILES += \
+    dataset/ui/attack.png

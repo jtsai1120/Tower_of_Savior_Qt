@@ -46,7 +46,9 @@ public:
     void game_over();
     void show_damage(QLabel *text, int seconds);
 
+
     int level = 1;
+
 
 public slots:
     void combo_eliminate();

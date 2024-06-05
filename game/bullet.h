@@ -1,26 +1,31 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#include <QWidget>
-#include <QPointF>
+#include <QGraphicsPixmapItem>
+#include <QLabel>
+#include <QPixmap>
+#include <vector>
+#include <QDebug>
+#include <QPixmap>
+#include <QLabel>
+#include <QPropertyAnimation>
+#include <QTimer>
+#include <QGraphicsOpacityEffect>
 
-class Bullet : public QWidget {
-    Q_OBJECT
+using namespace std;
 
+class Bullet{
 public:
-    Bullet(QPointF start, QPointF end, QWidget *parent = nullptr);
+    Bullet(QWidget *parent);
+    QPixmap bullet_pic;
 
-protected:
-    void paintEvent(QPaintEvent *event) override;
+    QLabel *bullet_item;
 
-private slots:
-    void updateProgress();
-    void hideCurve();
+    void shoot(qreal endx, qreal endy);
+    void finish();
 
-private:
-    QPointF start;
-    QPointF end;
-    qreal progress; // 记录绘制进度
+    QPropertyAnimation *shoot_animation;
+
 };
 
 #endif // BULLET_H

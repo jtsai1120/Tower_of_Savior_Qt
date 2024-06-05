@@ -74,5 +74,6 @@
         <file>dataset/game_lose.wav</file>
         <file>dataset/ui/restart button.jpg</file>
         <file>dataset/menu_bgm.wav</file>
+        <file>dataset/ui/attack.png</file>
     </qresource>
 </RCC>

@@ -81,6 +81,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     cd_text3->setStyleSheet("color: white");
     cd_text3->resize(200, 200);
 
+    //assign bullet to each character
+    bullet.resize(6);
+    for (int i = 0; i < 6; i++){
+        bullet[i] = new Bullet(this);
+    }
+
 
 
     // 頂部角色設置欄位
@@ -92,6 +98,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         charac_slots[i]->charac_item->setFixedHeight(90);
         charac_slots[i]->charac_item->move(0 + i * 90, 360);
         charac_slots[i]->attack_text->move(25 + i * 90, 315);
+        bullet[i]->bullet_item->move(45 + i * 90, 360);
+        bullet[i]->bullet_item->hide();
     }
 
     //set enemy and hp
@@ -879,6 +887,12 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         charac_slots[attack_wait_count]->attack_text->hide();
         qDebug()<<"original attack"<<charac_slots[attack_wait_count]->attack;
 
+        //子彈放回
+        for (int i = 0; i < 6; i++) {
+            bullet[i]->bullet_item->move(45 + i * 90, 360);
+            bullet[i]->bullet_item->hide();
+        }
+
         //攻擊敵人
         if ((charac_slots[attack_wait_count]->attack) > 0 && !(enemy[0]->dead && enemy[1]->dead && enemy[2]->dead)){
             if (level == 1 || level == 2){
@@ -923,6 +937,11 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             damage = advantage_attribute * charac_slots[attack_wait_count]->attack;
             qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
 
+            //attack animation
+
+            bullet[attack_wait_count]->bullet_item->show();
+            bullet[attack_wait_count]->shoot(enemy[attack_enemy]->enemy_item->x()+60,enemy[attack_enemy]->enemy_item->y()+60);
+
 
 
             if (!basic) damage *= 0.001;
@@ -930,13 +949,14 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
 
             qDebug()<<damage;
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
+            enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
+
 
             charac_slots[attack_wait_count]->damage_text->show();
             charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
             charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
             show_damage(charac_slots[attack_wait_count]->damage_text, 500);
 
-            enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
             if ((enemy[attack_enemy]->hp) <= 0){
                 enemy[attack_enemy]->dead = true;
                 enemy_hp[attack_enemy]->hp_bar->move(0,1000);
@@ -1110,6 +1130,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         move_free = false;
         skill = 0;
 
+
         // 扣血傷害
         if (harm){
             icon_bar->heal_text->setStyleSheet("color: red");
@@ -1146,6 +1167,8 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
                     game_status = 1; // 開始下一局
                     can_move_runestone = true;
+
+
                 });
             } else {
                 // 畫面亮回，準備下一局
@@ -1383,3 +1406,5 @@ void MainWindow::show_damage(QLabel *text, int seconds){
    // 启动QTimer，设置延迟时间为milliseconds毫秒
    timer->start(seconds);
 }
+
+
