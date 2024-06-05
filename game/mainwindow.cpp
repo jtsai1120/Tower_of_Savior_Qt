@@ -53,9 +53,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     skill_text->setFont(skill_text_font);
     skill_text->setStyleSheet("color: white");
     skill_text->resize(2000, 300);
-    skill_text->move(32, 580);
+    skill_text->move(20, 600);
     skill_text->show();
-    //skill_text->setText("Mission 1:\n  關卡1: 無技能\n  關卡二: 回合結束隨機風化\n  關卡三: 燃燒軌跡");
+    skill_text->setText("Mission 1:\n  Level 1: No Skill\n  Level 2: Weather 2 Stones After\n\n  Level 3: Burn While Move\n");
 
     gameover_text = new QLabel(this);
     QFontDatabase::addApplicationFont(":/dataset/Survival Instinx");
@@ -255,6 +255,13 @@ void MainWindow::on_start_button_clicked() {
         enemy[i]->enemy_item->move(85 +  130*i, 200);
         enemy_hp[i]->hp_bar->move(100 +  133*i, 330);
     }
+
+    if (!basic){
+        enemy[0]->cd = 3;
+        enemy[1]->cd = 1;
+        enemy[2]->cd = 2;
+    }
+
     cd_text1->move(70,150);
     cd_text1->show();
     cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
@@ -298,13 +305,19 @@ void MainWindow::on_start_button_clicked() {
     }
 
     // 若隊長為基礎隊長，進場跳技能
-    if (!basic)
-        if (charac_slots[0]->charac_ID < 5)
+    if (!basic) {
+        if (charac_slots[0]->charac_ID < 5){
             for (int i = 0; i < 6; i++)
                 if(charac_slots[i]->charac_ID != -1){
                     charac_slots[i]->CD = 0;
                     charac_slots[i]->charac_item->move(0 + i * 90, 350);
                 }
+        }
+        else if (charac_slots[0]->charac_ID == 8) {
+            charac_slots[0]->CD = 0;
+            charac_slots[0]->charac_item->move(0, 350);
+        }
+    }
 
     // 基礎模式則置成1
     if (basic){
@@ -348,7 +361,7 @@ void MainWindow::on_restart_button_clicked() {
             runestones[i][j]->change_color("empty", 0);
         }
     }
-    skill_text->setText("Mission 1:\n  關卡1: 無技能\n  關卡二: 回合結束隨機風化\n  關卡三: 燃燒軌跡");
+    skill_text->setText("Mission 1:\n  Level 1: No Skill\n  Level 2: Weather 2 Stones After\n\n  Level 3: Burn While Move\n");
     skill_text->show();
     harm = 0; // 所受傷害
     damage = 0;
@@ -455,17 +468,16 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             charac_slots[event->x() / 90] -> change_charac(leader, basic);
             // 技能敘述
             if (!basic) skill_text->setText(skill_descript[charac_slots[event->x() / 90]->charac_ID]);
-
         }
         // 更換任務
         if (event->x() >= 10 && event->x() <= 190 && event->y() >= 520 && event->y() <= 603) {
             if (basic){
-                skill_text->setText("Mission 2:\n  關卡1: 無技能\n  關卡二: 燃燒/隨機風化/燃燒\n  關卡三: 10+combo追擊、 燃燒軌跡");
+                skill_text->setText("Mission 2:\n  Level 1: No Skill\n  Level 2: Attack first\n  Weather 2 Stones After;\n  Burn 2 Places x2\n  Level 3: Burn While Move,\n  10+combo or Hits");
                 basic = false;
                 ui_text->setText("Mission 2");
             }
             else{
-                skill_text->setText("Mission 1:\n  關卡1: 無技能\n  關卡二: 回合結束隨機風化\n  關卡三: 燃燒軌跡");
+                skill_text->setText("Mission 1:\n  Level 1: No Skill\n  Level 2: Weather 2 Stones After\n\n  Level 3: Burn While Move\n");
                 basic = true;
                 ui_text->setText("Mission 1");
             }
@@ -516,11 +528,11 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             back_button->raise();
             skill_text->raise();
             if (basic){
-                skill_text->setText("Mission 1:\n  關卡1: 無技能\n  關卡二: 回合結束隨機風化\n  關卡三: 燃燒軌跡");
+                skill_text->setText("Mission 1:\n  Level1: No Skill\n  Level 2: Weather 2 Stones After\n\n  Level3: Burn While Move");
                 skill_text->show();
             }
             else{
-                skill_text->setText("Mission 2:\n  關卡1: 無技能\n  關卡二: 燃燒/隨機風化/燃燒\n  關卡三: 燃燒軌跡");
+                skill_text->setText("Mission 2:\n  Level1: No Skill\n  Level 2: Weather 2 Stones After;\n  Burn 2 Places x2\n  Level3: Burn While Move, 10+combo or Hits");
                 skill_text->show();
             }
         }
@@ -825,7 +837,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
             return;
         }
-        if (attack_wait_count == -1){ // 不攻擊，乘上combo數
+        if (attack_wait_count == -1){ // 還沒要攻擊，乘上combo數
             double combo_power = 1;
             if (!basic && combo > 1) combo_power = combo * 0.5;
             int more_multi = 1; // 全隊倍率
@@ -836,14 +848,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
             attack_wait_count ++;
             for(int i = 0; i < int(charac_slots.size()); i++){
-                if (charac_slots[i]->attack == 0) {
-                    if (basic) continue;
-                    // 關掉角色9的追擊技能
-                    if (charac_slots[i]->hit_more == 2){
-                        charac_slots[i]->hit_more = -1;
-                        double_combo = false;
-                    }
-                }
+                if (charac_slots[i]->attack == 0) continue;
                 charac_slots[i]->attack *= combo_power;
                 if (!basic){ // 隊長、技能額外倍率
                     charac_slots[i]->attack *= more_multi;
@@ -853,18 +858,37 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
 
             // 角色10隊長技能
-            if (!basic && charac_slots[0]->charac_ID == 9) {
-                int highest_power = 0;
-                for(int i = 0; i < int(charac_slots.size()); i++)
-                    if (charac_slots[i]->attack > highest_power)
-                        highest_power = charac_slots[i]->attack;
+            if (!basic){
+                if (charac_slots[0]->charac_ID == 9) {
+                    int highest_power = 0;
+                    for(int i = 0; i < int(charac_slots.size()); i++)
+                        if (charac_slots[i]->attack > highest_power)
+                            highest_power = charac_slots[i]->attack;
+                    for(int i = 0; i < int(charac_slots.size()); i++){
+                        if (charac_slots[i]->charac_ID != -1){
+                            charac_slots[i]->attack = highest_power;
+                            charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
+                        }
+                    }
+                } else if (charac_slots[0]->charac_ID == 8) { // 角色9隊長技能
+                    if (charac_slots[1]->attack != 0){
+                        charac_slots[0]->attack += charac_slots[1]->attack;
+                        charac_slots[1]->attack = 0;
+                        charac_slots[0]->attack_text->setText(QString::number(charac_slots[0]->attack));
+                        charac_slots[1]->attack_text->setText(QString::number(charac_slots[1]->attack));
+                    }
+                }
+                // 關掉角色9的追擊技能
                 for(int i = 0; i < int(charac_slots.size()); i++){
-                    if (charac_slots[i]->charac_ID != -1){
-                        charac_slots[i]->attack = highest_power;
-                        charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
+                    if (charac_slots[i]->attack == 0) {
+                        if (charac_slots[i]->hit_more == 2){
+                            charac_slots[i]->hit_more = -1;
+                            double_combo = false;
+                        }
                     }
                 }
             }
+
             heal *= combo_power;
             icon_bar->heal_text->setText("+" + QString::number(heal));
 
@@ -943,6 +967,10 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             bullet[attack_wait_count]->shoot(enemy[attack_enemy]->enemy_item->x()+60,enemy[attack_enemy]->enemy_item->y()+60);
 
 
+            charac_slots[attack_wait_count]->damage_text->show();
+            charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
+            charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
+            show_damage(charac_slots[attack_wait_count]->damage_text, 500);
 
             if (!basic) damage *= 0.001;
             if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
@@ -951,11 +979,6 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
             enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
 
-
-            charac_slots[attack_wait_count]->damage_text->show();
-            charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
-            charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
-            show_damage(charac_slots[attack_wait_count]->damage_text, 500);
 
             if ((enemy[attack_enemy]->hp) <= 0){
                 enemy[attack_enemy]->dead = true;
@@ -1032,6 +1055,12 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         survive.push_back(0);
                         survive.push_back(1);
                         survive.push_back(2);
+                        enemy[i]->cd = 3;
+                    }
+                    if (!basic) {
+                        enemy[0]->cd = 1;
+                        enemy[1]->cd = 0;
+                        enemy[2]->cd = 1;
                     }
                 }
                 if (level == 3){
@@ -1044,8 +1073,29 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     enemy_hp[0]->changeImageColor(3,0);
                     enemy_hp[0]->hp_bar->move(140, 330);
                     survive.push_back(0);
+                    enemy[0]->cd = 5;
+                    if (!basic) enemy[0]->cd = 2;
                 }
 
+            }
+            else{
+                for (int i = 0; i < 3; i++){
+                    if (enemy[i]->cd > 0)
+                        enemy[i]->cd--;
+                    if ((enemy[i]->dead) == true){
+                        enemy[i]->enemy_item->move(0,1000); //將死亡敵人移除
+                        enemy[i]->cd = 1000;
+                    }
+                }
+            }
+        }else {
+            for (int i = 0; i < 3; i++){
+                if (enemy[i]->cd > 0)
+                    enemy[i]->cd--;
+                if ((enemy[i]->dead) == true){
+                    enemy[i]->enemy_item->move(0,1000); //將死亡敵人移除
+                    enemy[i]->cd = 1000;
+                }
             }
         }
 
@@ -1070,19 +1120,10 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             }
         }
 
-        for (int i = 0; i < 3; i++){
-            if (enemy[i]->cd > 0)
-                enemy[i]->cd--;
-            if (enemy[i]->cd > 0 && !basic)
-                enemy[i]->cd--;
-            if ((enemy[i]->dead) == true)
-                enemy[i]->enemy_item->move(0,1000); //將死亡敵人移除
-        }
-
         // 受傷倍率
         double magnify = 1;
         if (!basic) {
-            magnify = 6.5;
+            magnify = 7.2;
             if (skill == 9) magnify = 0;
         }
 
@@ -1094,6 +1135,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         harm += enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd = 3;
+                        if (!basic) enemy[i]->cd = 1;
                     }
                 }
                 if (level == 2){
@@ -1101,6 +1143,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         harm += enemy[i]->attack * magnify;
                         qDebug()<<"enemy attack!";
                         enemy[i]->cd = 3;
+                        if (!basic) enemy[i]->cd = 2;
                     }
                 }
             }
@@ -1112,6 +1155,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 if (!basic && (combo < 10)) harm *= (10 - combo); // 追擊
                 qDebug()<<"enemy attack!";
                 enemy[0]->cd = 5;
+                if (!basic) enemy[0]->cd = 2;
             }
         }
         if (level == 1 || level == 2){
@@ -1213,15 +1257,16 @@ void MainWindow::combo_count() {
             }
         }
         // 還原本來就有燃燒的位置
-        if (enemy[0]->dead == false){
-            runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
-            runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
+        if (!basic && level == 2){
+            if (enemy[0]->dead == false){
+                runestones[0][0]->change_color(runestones[0][0]->get_color(), 1);
+                runestones[0][5]->change_color(runestones[0][5]->get_color(), 1);
+            }
+            if (enemy[2]->dead == false){
+                runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
+                runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
+            }
         }
-        if (enemy[2]->dead == false){
-            runestones[4][0]->change_color(runestones[4][0]->get_color(), 1);
-            runestones[4][5]->change_color(runestones[4][5]->get_color(), 1);
-        }
-
         return;
     }
     combo_text->show();
@@ -1302,6 +1347,31 @@ void MainWindow::combo_eliminate() {
     }
     icon_bar->heal_text->setStyleSheet("color: lime");
     icon_bar->heal_text->setText("+" + QString::number(heal));
+
+    // 消除一組8顆延遲
+    if (!basic && charac_slots[0]->charac_ID == 7)
+        if (cur_pair.pair.size() > 7){
+            int i = 1;
+            while (true){
+                bool found = false;
+                for (int i = 0; i < 3; i++){
+                    if (enemy[i]->cd == i){
+                        found = true;
+                        enemy[i]->cd ++;
+                        break;
+                    }
+                }
+                if (i>100 || found) break;
+            }
+            if (level == 1 || level == 2){
+                cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
+                cd_text2->setText("CD" +  QString::number(enemy[1]->cd));
+                cd_text3->setText("CD" +  QString::number(enemy[2]->cd));
+            }
+            else if (level == 3)
+                cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
+        }
+
 
 
     if (double_combo) combo++;
