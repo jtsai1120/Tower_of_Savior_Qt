@@ -190,15 +190,15 @@ private:
     */
 
     vector<QString> skill_descript = {
-        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2，CD cut down to 0"},
-        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2，CD cut down to 0"},
-        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2，CD cut down to 0"},
-        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2，CD cut down to 0"},
-        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2，CD cut down to 0"},
-        {"I'm gonna prove we're not wrong!\n CD 8 \n  Turn fixed layout，atk x3,\n  Eliminate burning effects\n\nLeader: dark, water, earth\n  has others' effect，hp x1.5"},
+        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
+        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
+        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
+        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
+        {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
+        {"I'm gonna prove we're not wrong!\n CD 6 \n  Turn fixed layout, atk x3,\n  Eliminate burning while move\n\nLeader: dark, water, earth\n  has others' effect, hp x1.5"},
         {"The only problem is me. CD 4 \n  atk xamount of heart eliminates\n\nLeader:\n  Heart shares all attributes,\n  Fixed heart every round, hp x1.5"},
-        {"Stop calling me a liar! CD 6 \n  Move free,\n  Self attack advance attribute，\n  Teammates aside CD-1\n\nLeader:\n  Eliminate 8+ connected,\n  enemy with shortest CD+1,\n  hp x1.5"},
-        {"Stop fighting or I'll quit! CD 6 \n  combo x2, Hits +2 times，\n  Effect continues until\n  self atk = 0\n\nLeader:\n  Self CD cut down to 0,\n  Eats up right side's atk,\n  hp x1.5"},
+        {"Stop calling me a liar! CD 6 \n  Move free,\n  Self attack advance attribute, \n  Teammates aside CD-1\n\nLeader:\n  Eliminate 8+ connected,\n  enemy with shortest CD+1,\n  hp x1.5"},
+        {"Stop fighting or I'll quit! CD 6 \n  combo x2, Hits +2 times,\n  Effect continues until\n  self atk = 0\n\nLeader:\n  Self CD cut down to 0,\n  Eats up right side's atk,\n  hp x1.5"},
         {"This is why I need to rock. CD 8 \n  Whole team atk x2,\n  Enemy atk = 0,\n  Burning heals instead\n\nLeader:\n  Whole team's atk copies highest,\n  hp x1.5"},
     };
 

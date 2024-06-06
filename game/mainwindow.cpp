@@ -528,11 +528,11 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             back_button->raise();
             skill_text->raise();
             if (basic){
-                skill_text->setText("Mission 1:\n  Level1: No Skill\n  Level 2: Weather 2 Stones After\n\n  Level3: Burn While Move");
+                skill_text->setText("Mission 1:\n  Level 1: No Skill\n  Level 2: Weather 2 Stones After\n\n  Level 3: Burn While Move\n");
                 skill_text->show();
             }
             else{
-                skill_text->setText("Mission 2:\n  Level1: No Skill\n  Level 2: Weather 2 Stones After;\n  Burn 2 Places x2\n  Level3: Burn While Move, 10+combo or Hits");
+                skill_text->setText("Mission 2:\n  Level 1: No Skill\n  Level 2: Attack first\n  Weather 2 Stones After;\n  Burn 2 Places x2\n  Level 3: Burn While Move,\n  10+combo or Hits");
                 skill_text->show();
             }
         }
@@ -604,10 +604,15 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 
                 charac_slots[event->x() / 90]->charac_item->move(0 + (event->x() / 90) * 90, 360);
             }
+            else if (!basic){
+                charac_slots[event->x() / 90]->attack_text->show();
+                charac_slots[event->x() / 90]->attack_text->setText(QString::number(charac_slots[event->x() / 90]->CD));
+            }
         }
         // 正常轉珠
         else if (event->y() >= 510) {
             if (can_move_runestone) {
+                for (int i=0;i<int(charac_slots.size());i++) charac_slots[i]->attack_text->hide();
                 runestone_selected = true;
                 selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
                 runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
