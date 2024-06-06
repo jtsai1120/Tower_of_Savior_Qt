@@ -1368,17 +1368,18 @@ void MainWindow::combo_eliminate() {
     // 消除一組8顆延遲
     if (!basic && charac_slots[0]->charac_ID == 7)
         if (cur_pair.pair.size() > 7){
-            int i = 1;
+            int j = 1;
             while (true){
                 bool found = false;
                 for (int i = 0; i < 3; i++){
-                    if (enemy[i]->cd == i){
+                    if (enemy[i]->cd == j){
                         found = true;
-                        enemy[i]->cd ++;
+                        enemy[i]->cd++;
                         break;
                     }
                 }
-                if (i>100 || found) break;
+                if (j>100 || found) break;
+                else j++;
             }
             if (level == 1 || level == 2){
                 cd_text1->setText("CD" +  QString::number(enemy[0]->cd));
