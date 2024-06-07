@@ -879,6 +879,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     if (charac_slots[1]->attack != 0){
                         charac_slots[0]->attack += charac_slots[1]->attack;
                         charac_slots[1]->attack = 0;
+                        charac_slots[0]->attack_text->show();
                         charac_slots[0]->attack_text->setText(QString::number(charac_slots[0]->attack));
                         charac_slots[1]->attack_text->setText(QString::number(charac_slots[1]->attack));
                     }
