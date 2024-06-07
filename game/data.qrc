@@ -82,7 +82,7 @@
         <file>dataset/character/ID14.png</file>
         <file>dataset/character/ID15.png</file>
         <file>dataset/GBC bgm.WAV</file>
-        <file>dataset/Bocchi BGM.WAV</file>
         <file>dataset/character/ID15-2.png</file>
+        <file>dataset/Bocchi BGM.WAV</file>
     </qresource>
 </RCC>
