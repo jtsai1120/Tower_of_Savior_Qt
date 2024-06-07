@@ -1033,7 +1033,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
             show_damage(charac_slots[attack_wait_count]->damage_text, 500);
 
-            //if (!basic) damage *= 0.001;
+            if (!basic) damage *= 0.001;
             if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
 
             qDebug()<<damage;
