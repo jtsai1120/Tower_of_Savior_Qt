@@ -82,21 +82,17 @@ Charac_slot::Charac_slot(QWidget *parent){
     damage_text->move(0,1000);
 }
 
-void Charac_slot::change_charac(int is_lead, bool is_basic){
+void Charac_slot::change_charac(bool is_basic){
     basic = is_basic;
-    leader = is_lead;
 
     if (charac_ID == -1) charac_ID = 5;
     else if (charac_ID + 1 < int(charac_pics.size()))
         charac_ID++;
     else
         charac_ID = 0;
-    if (leader == -2) leader = charac_ID;
 
-    if (!basic){
-        CD = charac_CD[charac_ID]; // 設定CD
-        if (leader == 9 || leader == 11) CD--;
-    }
+
+    if (!basic) CD = charac_CD[charac_ID]; // 設定CD
 
     charac_item->setPixmap(charac_pics[charac_ID]);
 

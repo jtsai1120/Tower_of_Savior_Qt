@@ -17,7 +17,7 @@ public:
     Charac_slot(QWidget *parent);
     QLabel *charac_item;
 
-    void change_charac(int is_lead, bool basic);
+    void change_charac(bool basic);
     int charac_ID;
     int CD;
     int skill_power;
@@ -38,6 +38,7 @@ public:
     QLabel *damage_text;
 
     int hit_more;
+    int leader;
 
 private:
     QPixmap empty_slot;
@@ -49,7 +50,6 @@ private:
     vector <int> charac_atk;
     vector <int> charac_CD;
 
-    int leader;
 
     bool basic;
     bool all_atk = false; // 若消除一組>5顆，則攻擊為全體攻擊

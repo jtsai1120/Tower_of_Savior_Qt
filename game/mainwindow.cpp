@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     gameover_text = new QLabel(this);
     QFontDatabase::addApplicationFont(":/dataset/Survival Instinx");
-    QFont gameover_text_font("Survival Instinx", 50, QFont::Bold);
+    QFont gameover_text_font("Survival Instinx", 40, QFont::Bold);
     gameover_text->setFont(gameover_text_font);
     gameover_text->setStyleSheet("color: red");
     gameover_text->resize(1000, 1000);
@@ -291,6 +291,7 @@ void MainWindow::on_start_button_clicked() {
     init_hp = 0;
     harm = 0;
     for (int i = 0; i < 6; i++) {
+        charac_slots[i]->leader = charac_slots[0]->charac_ID;
         if (!basic) charac_slots[i]->attack_text->move(10 + i * 90, 315);
 
         if(charac_slots[i]->charac_ID == -1)
@@ -321,7 +322,9 @@ void MainWindow::on_start_button_clicked() {
             charac_slots[0]->CD = 0;
             charac_slots[0]->charac_item->move(0, 350);
         }
-        if (charac_slots[0]->charac_ID == 7) time_limit = 20;
+        else if (charac_slots[0]->charac_ID == 9 || charac_slots[0]->charac_ID == 11)
+            for (int i = 0; i < 6; i++)
+                if(charac_slots[i]->charac_ID != -1) charac_slots[i]->CD--;
     }
 
     // 基礎模式則置成1
@@ -381,6 +384,10 @@ void MainWindow::on_restart_button_clicked() {
     icon_bar->heal_text->setStyleSheet("color: lime");
     basic = true;
     full_darken->hide();
+    gameover_text->setStyleSheet("color: red");
+    gameover_text->resize(1000, 1000);
+    gameover_text->move(50, -250);
+    gameover_text->setText("Game Over");
     gameover_text->hide();
     restart_button->hide();
     darken->hide();
@@ -469,12 +476,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
     if (game_status == 0 && (event->button() == Qt::LeftButton || event->button() == Qt::RightButton)){
         // 更換角色
         if (event->y() >= 360 && event->y() <= 450) {
-            int leader = charac_slots[0]->charac_ID;
-            if((event->x() / 90) == 0) leader = -2;
             if (event->button() == Qt::LeftButton)
-                charac_slots[event->x() / 90] -> change_charac(leader, basic);
+                charac_slots[event->x() / 90] -> change_charac(basic);
             else
-                for (int i=0;i<5;i++) charac_slots[event->x() / 90] -> change_charac(leader, basic);
+                for (int i=0;i<5;i++) charac_slots[event->x() / 90] -> change_charac(basic);
 
             // 技能敘述
             if (!basic) skill_text->setText(skill_descript[charac_slots[event->x() / 90]->charac_ID]);
@@ -495,12 +500,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             }
             for (int i = 0; i < int(charac_slots.size()); i++){
                 int charac_ID = charac_slots[i]->charac_ID;
-                int leader = charac_slots[0]->charac_ID;
-                if(i == 0) leader = -2;
                 if(charac_slots[i]->charac_ID != -1){
-                    charac_slots[i] -> change_charac(leader, basic);
+                    charac_slots[i] -> change_charac(basic);
                     while (charac_slots[i]->charac_ID != charac_ID)
-                        charac_slots[i] -> change_charac(leader, basic);
+                        charac_slots[i] -> change_charac(basic);
                 }
             }
         }
@@ -551,7 +554,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             }
         }
         // 開啟技能
-        else if (!basic && event->y() >= 350 && event->y() <= 440) {
+        else if (can_move_runestone && !basic && event->y() >= 350 && event->y() <= 440) {
             if (event->button() == Qt::LeftButton){
                 if (charac_slots[event->x() / 90]->CD == 0){
                     if (charac_slots[event->x() / 90]->charac_ID< 5){
@@ -860,14 +863,21 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 ui_text->show();
                 ui_text->setText("Wave 0" + QString::number(level + 1) + "/ 03");
                 if (level == 3){ // 結束了
-                    enemy[2]->enemy_item->hide();
-                    ui_text->setText("  VICTORY!");
+                    ui_button->hide();
+                    ui_text->hide();
+                    enemy[0]->enemy_item->hide();
+
+                    gameover_text->setStyleSheet("color: yellow");
+                    gameover_text->resize(1000, 1000);
+                    gameover_text->move(75, -250);
+                    gameover_text->setText("VICTORY!");
+                    gameover_text->show();
+
                     bg->battle_bgm->stop();
                     bg->win_bgm->play();
                     full_darken->show();
                     full_darken->raise();
-                    ui_button->raise();
-                    ui_text->raise();
+                    gameover_text->raise();
                     restart_button->show();
                     restart_button->raise();
                     return;
@@ -1023,7 +1033,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
             show_damage(charac_slots[attack_wait_count]->damage_text, 500);
 
-            if (!basic) damage *= 0.001;
+            //if (!basic) damage *= 0.001;
             if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
 
             qDebug()<<damage;
