@@ -181,11 +181,15 @@ private:
         {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
         {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
         {"元素爆擊 CD 5 \n  還原、轉換固定版面\n  自身必定剋制\n\n隊長技能: atk 2倍，CD減至0"},
-        {"我要證明，我們並沒有錯! CD 8 \n  轉換固定版面，\n  一回合內atk 3倍，消除所有燃燒效果\n\n隊長技能: 水木暗互相兼具，hp 1.5倍"},
+        {"我要證明，我們並沒有錯! CD 6 \n  轉換固定版面，\n  一回合內atk 3倍，消除燃燒軌跡，轉珠延長至20秒\n\n隊長技能: 水木暗互相兼具，hp 1.5倍"},
         {"錯的人是我。 CD 4 \n  根據消除的心數量向上提升atk\n\n隊長技能: 心兼具所有屬性效果，\n  回合開始轉換固定位置心，hp 1.5倍"},
-        {"不要再叫我騙子了! CD 6 \n  一回合內排珠，自身必定剋制，\n  身旁隊友CD-1\n\n隊長技能: 消除8相連延遲CD最少敵人，hp 1.5倍"},
-        {"你們再吵架我就退出! CD 6 \n  combo數 2倍及額外追擊2次，\n  效果持續至自身沒有攻擊\n\n隊長技能: 自身CD減至0, 吸收右方隊員atk，hp 1.5倍"},
-        {"因此我也需要搖滾。 CD 8 \n  全隊atk 2倍，免疫\n  燃燒轉回血\n\n隊長技能: 所有人跟隨最高atk, hp1.5倍"},
+        {"不要再叫我騙子了! CD 6 \n  一回合內排珠，自身必定剋制，\n  身旁隊友CD-1\n\n隊長技能: 消除8相連延遲CD最少敵人並增加8combo，hp 1.5倍"},
+        {"你們再吵架我就退出! CD 7 \n  combo數 2倍及額外追擊2次，\n  效果持續至自身沒有攻擊\n\n隊長技能: 自身CD減至0, 吸收右方隊員atk，hp 1.5倍"},
+        {"因此我也需要搖滾。 CD 8 \n  全隊atk 2倍，免疫\n  燃燒轉回血\n\n隊長技能: 所有人跟隨最高atk,所有技能CD縮減1, hp1.5倍"},
+        {"我不想要就這樣! CD 4 \n  根據消除的心數量向上提升atk\n\n隊長技能: 心兼具所有屬性效果，\n  回合開始轉換固定位置心，hp 1.5倍"},
+        {"先保持秘密吧! CD 8 \n  全隊atk 2倍，免疫\n  燃燒轉回血\n\n隊長技能: 所有人跟隨最高atk,所有技能CD縮減1, hp1.5倍"},
+        {"我這個人向來說到做到。 CD 6 \n  轉換固定版面，\n  一回合內atk 3倍，消除燃燒軌跡，轉珠延長至20秒\n\n隊長技能: 水火光暗互相兼具，hp 1.5倍"},
+
     };
     */
 
@@ -195,11 +199,18 @@ private:
         {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
         {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
         {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
+
         {"I'm gonna prove we're not wrong!\n CD 6 \n  Turn fixed layout, atk x3,\n  Eliminate 'burn while move'\n  Drift time 20s\n\nLeader: dark, water, earth\n  has others' effect, hp x1.5"},
-        {"The only problem is me. CD 4 \n  atk xamount of heart eliminates\n\nLeader:\n  Heart shares all attributes,\n  Fixed heart every round, hp x1.5"},
-        {"Stop calling me a liar! CD 6 \n  Move free,\n  Self attack advance attribute, \n  Teammates aside CD-1\n\nLeader:\n  Eliminate 8+ connected,\n  enemy with shortest CD+1,\n  Drift time 20s, hp x1.5"},
-        {"Stop fighting or I'll quit! CD 6 \n  combo x2, Hits +2 times,\n  Effect continues until\n  self atk = 0\n\nLeader:\n  Self CD cut down to 0,\n  Eats up right side's atk,\n  hp x1.5"},
-        {"This is why I need to rock. CD 8 \n  Whole team atk x2,\n  Enemy atk = 0,\n  Burning heals instead\n\nLeader:\n  Whole team's atk copies highest,\n  hp x1.5"},
+        {"The only problem is me. CD 5 \n  atk xamount of heart eliminates\n\nLeader:\n  Heart shares all attributes,\n  Fixed heart every round, hp x1.5"},
+        {"Stop calling me a liar! CD 6 \n  Move free,\n  Self attack advance attribute, \n  Teammates aside CD-1\n\nLeader:\n  Eliminate 8+ connected,\n  enemy with shortest CD+1,\n  combo +8, hp x1.5"},
+        {"Stop fighting or I'll quit! CD 7 \n  combo x2, Hits +2 times,\n  Effect continues until\n  self atk = 0\n\nLeader:\n  Self CD cut down to 0,\n  Eats up right side's atk,\n  hp x1.5"},
+        {"This is why I need to rock. CD 8 \n  Whole team atk x2,\n  Enemy atk = 0,\n  Burning heals instead\n\nLeader:\n  Whole team's atk copies highest,\n  All CD shrink 1, hp x1.5"},
+
+        {"I don't want to stay this way!\n CD 5 \n  atk xamount of heart eliminates\n\nLeader:\n  Heart shares all attributes,\n  Fixed heart every round, hp x1.5"},
+        {"Keep it secret for now! CD 8 \n  Whole team atk x2,\n  Enemy atk = 0,\n  Burning heals instead\n\nLeader:\n  Whole team's atk copies highest,\n  All CD shrink 1, hp x1.5"},
+        {"I always do what I say.\n CD 6 \n  Turn fixed layout, atk x3,\n  Eliminate 'burn while move'\n  Drift time 20s\n\nLeader: water, fire, light, dark\n  has others' effect, hp x1.5"},
+        {"Fuwa Fuwa~! Buwa Buwa! CD 6 \n  Move free,\n  Self attack advance attribute, \n  Teammates aside CD-1\n\nLeader:\n  Eliminate 8+ connected,\n  enemy with shortest CD+1,\n  combo +8, hp x1.5"},
+        {"Likes! I want more likes! CD 7 \n  combo x2, Hits +2 times,\n  Effect continues until\n  self atk = 0\n\nLeader:\n  Self CD cut down to 0,\n  Eats up right side's atk,\n  hp x1.5"},
     };
 
 };

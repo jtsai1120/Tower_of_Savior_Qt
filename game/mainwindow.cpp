@@ -232,8 +232,9 @@ void MainWindow::on_start_button_clicked() {
     if(charac_slots[0]->charac_ID == -1 || charac_slots[5]->charac_ID == -1)
         return;
 
-    if (charac_slots[0]->charac_ID > 4) bg->set_bgm(1);
-    else bg->set_bgm(0);
+    if (charac_slots[0]->charac_ID < 5) bg->set_bgm(0);
+    else if (charac_slots[0]->charac_ID < 10) bg->set_bgm(1);
+    else bg->set_bgm(2);
     bg->menu_bgm->stop();
     bg->battle_bgm->play();
 
@@ -316,7 +317,7 @@ void MainWindow::on_start_button_clicked() {
                     charac_slots[i]->charac_item->move(0 + i * 90, 350);
                 }
         }
-        else if (charac_slots[0]->charac_ID == 8) {
+        else if (charac_slots[0]->charac_ID == 8 || charac_slots[0]->charac_ID == 14) {
             charac_slots[0]->CD = 0;
             charac_slots[0]->charac_item->move(0, 350);
         }
@@ -465,15 +466,21 @@ QString MainWindow::random_runestone_color() {
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-    if (game_status == 0 && event->button() == Qt::LeftButton){
+    if (game_status == 0 && (event->button() == Qt::LeftButton || event->button() == Qt::RightButton)){
         // 更換角色
         if (event->y() >= 360 && event->y() <= 450) {
             int leader = charac_slots[0]->charac_ID;
             if((event->x() / 90) == 0) leader = -2;
-            charac_slots[event->x() / 90] -> change_charac(leader, basic);
+            if (event->button() == Qt::LeftButton)
+                charac_slots[event->x() / 90] -> change_charac(leader, basic);
+            else
+                for (int i=0;i<5;i++) charac_slots[event->x() / 90] -> change_charac(leader, basic);
+
             // 技能敘述
             if (!basic) skill_text->setText(skill_descript[charac_slots[event->x() / 90]->charac_ID]);
         }
+
+
         // 更換任務
         if (event->x() >= 10 && event->x() <= 190 && event->y() >= 520 && event->y() <= 603) {
             if (basic){
@@ -570,10 +577,12 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                     time_limit = 20;
                     burn_road = false;
                 }
-                if (charac_slots[event->x() / 90]->charac_ID == 6)
+                if (charac_slots[event->x() / 90]->charac_ID == 6
+                        || charac_slots[event->x() / 90]->charac_ID == 10)
                     for (int i=3; i<6; i++)
                         runestones[2][i]->change_color("heart", runestones[2][i]->status);
-                if (charac_slots[event->x() / 90]->charac_ID == 7) {
+                if (charac_slots[event->x() / 90]->charac_ID == 7
+                        || charac_slots[event->x() / 90]->charac_ID == 13) {
                     move_free = true;
                     if ((event->x() / 90) == 0){
                         if (charac_slots[5]->CD>0)charac_slots[5]->CD--;
@@ -589,19 +598,34 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                     }
                     // 檢查技能好了嗎
                     for (int i=0; i < int(charac_slots.size()); i++){
+                        charac_slots[i]->attack_text->hide();
                         if (charac_slots[i]->CD == 0){
                             charac_slots[i]->charac_item->move(0 + i * 90, 350);
                         }
                     }
                 }
-                if (charac_slots[event->x() / 90]->charac_ID == 8) {
+                if (charac_slots[event->x() / 90]->charac_ID == 8
+                        || charac_slots[event->x() / 90]->charac_ID == 14) {
                     if (double_combo) return;
                     double_combo = true;
                     charac_slots[event->x() / 90]->hit_more = 2;
                 }
-                if (charac_slots[event->x() / 90]->charac_ID == 9) skill = 9;
-                charac_slots[event->x() / 90]->CD_reset();
+                if (charac_slots[event->x() / 90]->charac_ID == 9
+                        || charac_slots[event->x() / 90]->charac_ID == 11) skill = 9;
+                if (charac_slots[event->x() / 90]->charac_ID == 12){
+                    for (int i=0; i<5; i++){
+                        runestones[i][0]->change_color("water", runestones[i][0]->status);
+                        runestones[i][1]->change_color("fire", runestones[i][1]->status);
+                        runestones[i][2]->change_color("earth", runestones[i][2]->status);
+                        runestones[i][3]->change_color("light", runestones[i][3]->status);
+                        runestones[i][4]->change_color("dark", runestones[i][4]->status);
+                        runestones[i][5]->change_color("heart", runestones[i][5]->status);
+                    }
+                    time_limit = 20;
+                    burn_road = false;
+                }
 
+                charac_slots[event->x() / 90]->CD_reset();
                 charac_slots[event->x() / 90]->charac_item->move(0 + (event->x() / 90) * 90, 360);
             }
             else if (!basic){
@@ -862,9 +886,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
             }
 
-            // 角色10隊長技能
+            // 角色10，12隊長技能
             if (!basic){
-                if (charac_slots[0]->charac_ID == 9) {
+                if (charac_slots[0]->charac_ID == 9 || charac_slots[0]->charac_ID == 11) {
                     int highest_power = 0;
                     for(int i = 0; i < int(charac_slots.size()); i++)
                         if (charac_slots[i]->attack > highest_power)
@@ -872,10 +896,12 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     for(int i = 0; i < int(charac_slots.size()); i++){
                         if (charac_slots[i]->charac_ID != -1){
                             charac_slots[i]->attack = highest_power;
+                            charac_slots[i]->attack_text->show();
                             charac_slots[i]->attack_text->setText(QString::number(charac_slots[i]->attack));
                         }
                     }
-                } else if (charac_slots[0]->charac_ID == 8) { // 角色9隊長技能
+                } else if (charac_slots[0]->charac_ID == 8
+                           || charac_slots[0]->charac_ID == 14) { // 角色9、15隊長技能
                     if (charac_slots[1]->attack != 0){
                         charac_slots[0]->attack += charac_slots[1]->attack;
                         charac_slots[1]->attack = 0;
@@ -884,7 +910,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                         charac_slots[1]->attack_text->setText(QString::number(charac_slots[1]->attack));
                     }
                 }
-                // 關掉角色9的追擊技能
+                // 關掉角色9、15的追擊技能
                 for(int i = 0; i < int(charac_slots.size()); i++){
                     if (charac_slots[i]->attack == 0) {
                         if (charac_slots[i]->hit_more == 2){
@@ -959,8 +985,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             else if (charac_slots[attack_wait_count]->attribute == "dark" && enemy[attack_enemy]->enemy_clr == "light")
                 advantage_attribute = 2;
 
-            // 角色8的技能
-            if (charac_slots[attack_wait_count]->skill_power == 7) advantage_attribute = 2;
+            // 角色8、13的技能
+            if (charac_slots[attack_wait_count]->skill_power == 7
+                    || charac_slots[attack_wait_count]->skill_power == 13) advantage_attribute = 2;
             if (charac_slots[attack_wait_count]->skill_power >= 0 &&
                     charac_slots[attack_wait_count]->skill_power <= 4) advantage_attribute = 2;
 
@@ -1209,9 +1236,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
 
         // 隊伍技能
-        if (!basic && charac_slots[0]->charac_ID == 7) time_limit = 20;
-        if (!basic && charac_slots[0]->charac_ID == 6)
-            for (int i=0;i<5;i++) runestones[i][0]->change_color("heart", runestones[i][0]->status);
+        if (!basic)
+            if (charac_slots[0]->charac_ID == 6 || charac_slots[0]->charac_ID == 10)
+                for (int i=0;i<5;i++) runestones[i][0]->change_color("heart", runestones[i][0]->status);
 
         if (game_status != 5){ // gameover = 5
             if (weather_amount != 0 || harm != 0) { // 風化符石或受傷延遲動畫
@@ -1374,8 +1401,9 @@ void MainWindow::combo_eliminate() {
     icon_bar->heal_text->setText("+" + QString::number(heal));
 
     // 消除一組8顆延遲
-    if (!basic && charac_slots[0]->charac_ID == 7)
+    if (!basic && (charac_slots[0]->charac_ID == 7 || charac_slots[0]->charac_ID == 13))
         if (cur_pair.pair.size() > 7){
+            combo += 8;
             int j = 1;
             while (true){
                 bool found = false;

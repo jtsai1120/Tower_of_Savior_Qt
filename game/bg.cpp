@@ -27,12 +27,9 @@ Bg::Bg(QWidget *parent) {
 }
 
 void Bg::set_bgm(int what_song){
-    if (what_song == 1){
-        battle_bgm = new QSound(":/dataset/GBC bgm.WAV");
-        battle_bgm->setLoops(-1);
-    }
-    else{
-        battle_bgm = new QSound(":/dataset/battle_bgm.wav");
-        battle_bgm->setLoops(-1);
-    }
+    if (what_song == 0) battle_bgm = new QSound(":/dataset/battle_bgm.wav");
+    else if (what_song == 1) battle_bgm = new QSound(":/dataset/GBC bgm.WAV");
+    else if (what_song == 2) battle_bgm = new QSound(":/dataset/Bocchi BGM.WAV");
+
+    battle_bgm->setLoops(-1);
 }

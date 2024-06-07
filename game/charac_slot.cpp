@@ -10,12 +10,19 @@ Charac_slot::Charac_slot(QWidget *parent){
         {":/dataset/character/ID3.png"},
         {":/dataset/character/ID4.png"},
         {":/dataset/character/ID5.png"},
-        {":/dataset/character/ID6.png"},
+        {":/dataset/character/ID6.png"},// GBC
         {":/dataset/character/ID7.png"},
         {":/dataset/character/ID8.png"},
         {":/dataset/character/ID9.png"},
-        {":/dataset/character/ID10.png"}
+        {":/dataset/character/ID10.png"},
+        {":/dataset/character/ID11.png"},// bocchi
+        {":/dataset/character/ID12.png"},
+        {":/dataset/character/ID13.png"},
+        {":/dataset/character/ID14.png"},
+        {":/dataset/character/ID15.png"}
     };
+    Bocchi_skill_pic.load(":/dataset/character/ID11-2.png");
+    Bocchi_skill_pic_1.load(":/dataset/character/ID15-2.png");
 
     charac_clr = {
         {"water"},
@@ -23,21 +30,30 @@ Charac_slot::Charac_slot(QWidget *parent){
         {"earth"},
         {"light"},
         {"dark"},
-        {"dark"},
+        {"dark"},// GBC
         {"water"},
         {"earth"},
         {"fire"},
         {"light"},
+        {"dark"},// bocchi
+        {"light"},
+        {"water"},
+        {"fire"},
+        {"earth"},
     };
 
     charac_atk = {80, 220, 120, 130, 280,
-                  330, 280, 180, 260, 230};
+                  330, 280, 180, 260, 230,
+                 330, 280, 180, 260, 230};
     charac_heal = {20, 2, 15, 11, 8,
-                   12, 18, 36, 13, 24};
+                   12, 18, 36, 13, 24,
+                  12, 18, 36, 13, 24};
     charac_hp = {600, 300, 450, 350, 180,
-                 380, 500, 800, 410, 620};
+                 380, 500, 800, 410, 620,
+                380, 500, 800, 410, 620};
     charac_CD = {5, 5, 5, 5, 5,
-                 6, 4, 6, 7, 8};
+                 6, 5, 6, 7, 8,
+                5, 8, 6, 6, 7};
     CD = -1;
     skill_power = -1;
     extra_atk = 1;
@@ -77,7 +93,10 @@ void Charac_slot::change_charac(int is_lead, bool is_basic){
         charac_ID = 0;
     if (leader == -2) leader = charac_ID;
 
-    if (!basic) CD = charac_CD[charac_ID]; // 設定CD
+    if (!basic){
+        CD = charac_CD[charac_ID]; // 設定CD
+        if (leader == 9 || leader == 11) CD--;
+    }
 
     charac_item->setPixmap(charac_pics[charac_ID]);
 
@@ -96,7 +115,7 @@ void Charac_slot::change_charac(int is_lead, bool is_basic){
 
 void Charac_slot::add_attack(Runestone_pair rp){
     int temp_atk = charac_atk[charac_ID];
-    if (skill_power == 5)
+    if (skill_power == 5 || skill_power == 12)
         temp_atk *= 3;
 
     QString clr = rp.color;
@@ -117,8 +136,16 @@ void Charac_slot::add_attack(Runestone_pair rp){
                 qDebug()<< "all_atk = "<<all_atk;
             }
         }
-        if (leader == 6){
+        if (leader == 6 || leader == 10){
             if (clr == "heart"){
+                attack += temp_atk * rp.pair.size();
+                if (rp.pair.size() > 4)
+                    all_atk = true;
+                qDebug()<< "all_atk = "<<all_atk;
+            }
+        }
+        if (leader == 12){
+            if (charac_clr[charac_ID] != "earth" && clr != "earth" && clr != "heart"){
                 attack += temp_atk * rp.pair.size();
                 if (rp.pair.size() > 4)
                     all_atk = true;
@@ -127,12 +154,14 @@ void Charac_slot::add_attack(Runestone_pair rp){
         }
     }
 
-    if (skill_power == 6)
+    if (skill_power == 6 || skill_power == 10)
         if (clr == "heart")
             extra_atk += rp.pair.size();
 }
 
 void Charac_slot::new_round(){
+    if (charac_ID == 10) charac_item->setPixmap(charac_pics[10]);
+    if (charac_ID == 14 && hit_more == -1) charac_item->setPixmap(charac_pics[14]);
     attack = 0;
     if (CD > 0 && !basic) CD--;
     skill_power = -1;
@@ -141,8 +170,12 @@ void Charac_slot::new_round(){
 }
 
 void Charac_slot::CD_reset(){
+    if (charac_ID == 10) charac_item->setPixmap(Bocchi_skill_pic);
+    else if (charac_ID == 14) charac_item->setPixmap(Bocchi_skill_pic_1);
+
     CD = charac_CD[charac_ID];
     skill_power = charac_ID;
+    if (leader == 9 || leader == 11) CD--;
     qDebug()<<"character"<<(charac_ID+1)<<"skill activated";
 }
 

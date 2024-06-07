@@ -42,6 +42,8 @@ public:
 private:
     QPixmap empty_slot;
     vector <QPixmap> charac_pics;
+    QPixmap Bocchi_skill_pic;
+    QPixmap Bocchi_skill_pic_1;
 
     vector <QString> charac_clr;
     vector <int> charac_atk;
