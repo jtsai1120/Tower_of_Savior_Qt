@@ -19,12 +19,20 @@ Bg::Bg(QWidget *parent) {
     runestone_bg->move(0, 510);
     runestone_bg->setFixedSize(runestone_bg_pic.width(), runestone_bg_pic.height());
 
-    battle_bgm = new QSound(":/dataset/battle_bgm.wav");
-    battle_bgm->setLoops(-1);
-
     menu_bgm = new QSound(":/dataset/menu_bgm.wav");
     menu_bgm->setLoops(-1);
 
     win_bgm = new QSound(":/dataset/game_win.wav");
     //win_bgm->setLoops(-1);
+}
+
+void Bg::set_bgm(bool is_GBC){
+    if (is_GBC){
+        battle_bgm = new QSound(":/dataset/GBC bgm.WAV");
+        battle_bgm->setLoops(-1);
+    }
+    else{
+        battle_bgm = new QSound(":/dataset/battle_bgm.wav");
+        battle_bgm->setLoops(-1);
+    }
 }

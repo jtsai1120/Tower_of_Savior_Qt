@@ -75,5 +75,6 @@
         <file>dataset/ui/restart button.jpg</file>
         <file>dataset/menu_bgm.wav</file>
         <file>dataset/ui/attack.png</file>
+        <file>dataset/GBC bgm.WAV</file>
     </qresource>
 </RCC>

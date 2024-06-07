@@ -12,6 +12,8 @@ public:
     QSound *battle_bgm;
     QSound *menu_bgm;
     QSound *win_bgm;
+
+    void set_bgm(bool is_GBC);
 private:
     QPixmap battle_bg_pic;
     QLabel *battle_bg;

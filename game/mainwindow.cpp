@@ -227,12 +227,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 void MainWindow::on_start_button_clicked() {
     qDebug() << "Start Button Clicked!";
-    bg->menu_bgm->stop();
-    bg->battle_bgm->play();
 
     // 至少要有隊長和副隊長才能開始
     if(charac_slots[0]->charac_ID == -1 || charac_slots[5]->charac_ID == -1)
         return;
+
+    if (charac_slots[0]->charac_ID > 4) bg->set_bgm(true);
+    else bg->set_bgm(false);
+    bg->menu_bgm->stop();
+    bg->battle_bgm->play();
 
     start_button->hide();
     game_status = 1; // game start
@@ -304,7 +307,7 @@ void MainWindow::on_start_button_clicked() {
         init_hp *= 1.5;
     }
 
-    // 若隊長為基礎隊長，進場跳技能
+    // 觸發隊長技能
     if (!basic) {
         if (charac_slots[0]->charac_ID < 5){
             for (int i = 0; i < 6; i++)
@@ -317,12 +320,14 @@ void MainWindow::on_start_button_clicked() {
             charac_slots[0]->CD = 0;
             charac_slots[0]->charac_item->move(0, 350);
         }
+        if (charac_slots[0]->charac_ID == 7) time_limit = 20;
     }
 
     // 基礎模式則置成1
     if (basic){
         init_heal = 5;
         init_hp = 2000;
+        time_limit = 10;
     }
     icon_bar->hp_text->setText(QString::number(init_hp) + "/" + QString::number(init_hp));
     icon_bar->heal_text->hide();
@@ -562,12 +567,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                         runestones[i][4]->change_color("water", runestones[i][4]->status);
                         runestones[i][5]->change_color("earth", runestones[i][5]->status);
                     }
-                    // 關閉燃燒路徑的位置
-                    for (int i = 0; i < int(runestones.size()); i++){
-                        for (int j = 0; j < int(runestones[i].size()); j++){
-                            if (runestones[i][j]->status == 1) runestones[i][j]->change_color(runestones[i][j]->get_color(), 0);
-                        }
-                    }
+                    time_limit = 20;
                     burn_road = false;
                 }
                 if (charac_slots[event->x() / 90]->charac_ID == 6)
@@ -843,7 +843,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             return;
         }
         if (attack_wait_count == -1){ // 還沒要攻擊，乘上combo數
-            double combo_power = 1;
+            double combo_power = combo;
             if (!basic && combo > 1) combo_power = combo * 0.5;
             int more_multi = 1; // 全隊倍率
 
@@ -1195,7 +1195,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         hp -= harm;
         move_free = false;
         skill = 0;
-
+        time_limit = 10;
 
         // 扣血傷害
         if (harm){
@@ -1207,7 +1207,9 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             game_over();
         }
 
-        if (charac_slots[0]->charac_ID == 6)
+        // 隊伍技能
+        if (!basic && charac_slots[0]->charac_ID == 7) time_limit = 20;
+        if (!basic && charac_slots[0]->charac_ID == 6)
             for (int i=0;i<5;i++) runestones[i][0]->change_color("heart", runestones[i][0]->status);
 
         if (game_status != 5){ // gameover = 5
