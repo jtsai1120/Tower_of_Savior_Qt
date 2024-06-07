@@ -26,8 +26,8 @@ Bg::Bg(QWidget *parent) {
     //win_bgm->setLoops(-1);
 }
 
-void Bg::set_bgm(bool is_GBC){
-    if (is_GBC){
+void Bg::set_bgm(int what_song){
+    if (what_song == 1){
         battle_bgm = new QSound(":/dataset/GBC bgm.WAV");
         battle_bgm->setLoops(-1);
     }

@@ -13,7 +13,7 @@ public:
     QSound *menu_bgm;
     QSound *win_bgm;
 
-    void set_bgm(bool is_GBC);
+    void set_bgm(int what_song);
 private:
     QPixmap battle_bg_pic;
     QLabel *battle_bg;

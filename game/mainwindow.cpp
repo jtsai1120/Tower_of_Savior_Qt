@@ -232,8 +232,8 @@ void MainWindow::on_start_button_clicked() {
     if(charac_slots[0]->charac_ID == -1 || charac_slots[5]->charac_ID == -1)
         return;
 
-    if (charac_slots[0]->charac_ID > 4) bg->set_bgm(true);
-    else bg->set_bgm(false);
+    if (charac_slots[0]->charac_ID > 4) bg->set_bgm(1);
+    else bg->set_bgm(0);
     bg->menu_bgm->stop();
     bg->battle_bgm->play();
 

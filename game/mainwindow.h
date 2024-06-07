@@ -195,7 +195,7 @@ private:
         {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
         {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
         {"Element Explode CD 5 \n  Return, turn fixed layout\n  Self attack advance attribute\n\nLeader: atk x2, CD cut down to 0"},
-        {"I'm gonna prove we're not wrong!\n CD 6 \n  Turn fixed layout, atk x3,\n  Eliminate burning while move\n  Drift time x2\n\nLeader: dark, water, earth\n  has others' effect, hp x1.5"},
+        {"I'm gonna prove we're not wrong!\n CD 6 \n  Turn fixed layout, atk x3,\n  Eliminate 'burn while move'\n  Drift time x2\n\nLeader: dark, water, earth\n  has others' effect, hp x1.5"},
         {"The only problem is me. CD 4 \n  atk xamount of heart eliminates\n\nLeader:\n  Heart shares all attributes,\n  Fixed heart every round, hp x1.5"},
         {"Stop calling me a liar! CD 6 \n  Move free,\n  Self attack advance attribute, \n  Teammates aside CD-1\n\nLeader:\n  Eliminate 8+ connected,\n  enemy with shortest CD+1,\n  Drift time x2\n  hp x1.5"},
         {"Stop fighting or I'll quit! CD 6 \n  combo x2, Hits +2 times,\n  Effect continues until\n  self atk = 0\n\nLeader:\n  Self CD cut down to 0,\n  Eats up right side's atk,\n  hp x1.5"},
