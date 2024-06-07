@@ -525,13 +525,15 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 
         return;
     }
-    if (game_status == 1 && event->button() == Qt::LeftButton) {
+    if (game_status == 1 || game_status == -2) {
         // 開啟設定介面
-        if (can_move_runestone && event->y() <= setting->height() && event->x() >= 540 - setting->width()) {
+        if (can_move_runestone && event->y() <= setting->height()
+                && event->x() >= 540 - setting->width() && event->button() == Qt::LeftButton) {
             game_status = -1;
             can_move_runestone = 0;
             qDebug() << "setting";
             QSound::play(":/dataset/setting_select.wav");
+            darken->hide();
             full_darken->show();
             full_darken->raise();
             surrender_button->show();
@@ -549,93 +551,109 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
             }
         }
         // 開啟技能
-        else if (event->y() >= 350 && event->y() <= 440) {
-            if (charac_slots[event->x() / 90]->CD == 0){
-                if (charac_slots[event->x() / 90]->charac_ID< 5){
-                    for (int i=0; i<3; i++){
-                        runestones[0][i]->change_color("water", 0);
-                        runestones[1][i]->change_color("fire", 0);
-                        runestones[2][i]->change_color("earth", 0);
-                        runestones[3][i]->change_color("light", 0);
-                        runestones[4][i]->change_color("dark", 0);
-                        runestones[0][i+3]->change_color("dark", 0);
-                        runestones[1][i+3]->change_color("water", 0);
-                        runestones[2][i+3]->change_color("fire", 0);
-                        runestones[3][i+3]->change_color("earth", 0);
-                        runestones[4][i+3]->change_color("light", 0);
-                    }
-                }
-                if (charac_slots[event->x() / 90]->charac_ID == 5){
-                    for (int i=0; i<5; i++){
-                        runestones[i][0]->change_color("dark", runestones[i][0]->status);
-                        runestones[i][1]->change_color("water", runestones[i][1]->status);
-                        runestones[i][2]->change_color("earth", runestones[i][2]->status);
-                        runestones[i][3]->change_color("dark", runestones[i][3]->status);
-                        runestones[i][4]->change_color("water", runestones[i][4]->status);
-                        runestones[i][5]->change_color("earth", runestones[i][5]->status);
-                    }
-                    time_limit = 20;
-                    burn_road = false;
-                }
-                if (charac_slots[event->x() / 90]->charac_ID == 6
-                        || charac_slots[event->x() / 90]->charac_ID == 10)
-                    for (int i=3; i<6; i++)
-                        runestones[2][i]->change_color("heart", runestones[2][i]->status);
-                if (charac_slots[event->x() / 90]->charac_ID == 7
-                        || charac_slots[event->x() / 90]->charac_ID == 13) {
-                    move_free = true;
-                    if ((event->x() / 90) == 0){
-                        if (charac_slots[5]->CD>0)charac_slots[5]->CD--;
-                        if (charac_slots[1]->CD>0)charac_slots[1]->CD--;
-                    }
-                    else if ((event->x() / 90) == 5){
-                        if (charac_slots[4]->CD>0)charac_slots[4]->CD--;
-                        if (charac_slots[0]->CD>0)charac_slots[0]->CD--;
-                    }
-                    else{
-                        if (charac_slots[(event->x() / 90) + 1]->CD>0)charac_slots[(event->x() / 90) + 1]->CD--;
-                        if (charac_slots[(event->x() / 90) - 1]->CD>0)charac_slots[(event->x() / 90) - 1]->CD--;
-                    }
-                    // 檢查技能好了嗎
-                    for (int i=0; i < int(charac_slots.size()); i++){
-                        charac_slots[i]->attack_text->hide();
-                        if (charac_slots[i]->CD == 0){
-                            charac_slots[i]->charac_item->move(0 + i * 90, 350);
+        else if (!basic && event->y() >= 350 && event->y() <= 440) {
+            if (event->button() == Qt::LeftButton){
+                if (charac_slots[event->x() / 90]->CD == 0){
+                    if (charac_slots[event->x() / 90]->charac_ID< 5){
+                        for (int i=0; i<3; i++){
+                            runestones[0][i]->change_color("water", 0);
+                            runestones[1][i]->change_color("fire", 0);
+                            runestones[2][i]->change_color("earth", 0);
+                            runestones[3][i]->change_color("light", 0);
+                            runestones[4][i]->change_color("dark", 0);
+                            runestones[0][i+3]->change_color("dark", 0);
+                            runestones[1][i+3]->change_color("water", 0);
+                            runestones[2][i+3]->change_color("fire", 0);
+                            runestones[3][i+3]->change_color("earth", 0);
+                            runestones[4][i+3]->change_color("light", 0);
                         }
                     }
-                }
-                if (charac_slots[event->x() / 90]->charac_ID == 8
-                        || charac_slots[event->x() / 90]->charac_ID == 14) {
-                    if (double_combo) return;
-                    double_combo = true;
-                    charac_slots[event->x() / 90]->hit_more = 2;
-                }
-                if (charac_slots[event->x() / 90]->charac_ID == 9
-                        || charac_slots[event->x() / 90]->charac_ID == 11) skill = 9;
-                if (charac_slots[event->x() / 90]->charac_ID == 12){
-                    for (int i=0; i<5; i++){
-                        runestones[i][0]->change_color("water", runestones[i][0]->status);
-                        runestones[i][1]->change_color("fire", runestones[i][1]->status);
-                        runestones[i][2]->change_color("earth", runestones[i][2]->status);
-                        runestones[i][3]->change_color("light", runestones[i][3]->status);
-                        runestones[i][4]->change_color("dark", runestones[i][4]->status);
-                        runestones[i][5]->change_color("heart", runestones[i][5]->status);
+                    if (charac_slots[event->x() / 90]->charac_ID == 5){
+                        for (int i=0; i<5; i++){
+                            runestones[i][0]->change_color("dark", runestones[i][0]->status);
+                            runestones[i][1]->change_color("water", runestones[i][1]->status);
+                            runestones[i][2]->change_color("earth", runestones[i][2]->status);
+                            runestones[i][3]->change_color("dark", runestones[i][3]->status);
+                            runestones[i][4]->change_color("water", runestones[i][4]->status);
+                            runestones[i][5]->change_color("earth", runestones[i][5]->status);
+                        }
+                        time_limit = 20;
+                        burn_road = false;
                     }
-                    time_limit = 20;
-                    burn_road = false;
-                }
+                    if (charac_slots[event->x() / 90]->charac_ID == 6
+                            || charac_slots[event->x() / 90]->charac_ID == 10)
+                        for (int i=3; i<6; i++)
+                            runestones[2][i]->change_color("heart", runestones[2][i]->status);
+                    if (charac_slots[event->x() / 90]->charac_ID == 7
+                            || charac_slots[event->x() / 90]->charac_ID == 13) {
+                        move_free = true;
+                        if ((event->x() / 90) == 0){
+                            if (charac_slots[5]->CD>0)charac_slots[5]->CD--;
+                            if (charac_slots[1]->CD>0)charac_slots[1]->CD--;
+                        }
+                        else if ((event->x() / 90) == 5){
+                            if (charac_slots[4]->CD>0)charac_slots[4]->CD--;
+                            if (charac_slots[0]->CD>0)charac_slots[0]->CD--;
+                        }
+                        else{
+                            if (charac_slots[(event->x() / 90) + 1]->CD>0)charac_slots[(event->x() / 90) + 1]->CD--;
+                            if (charac_slots[(event->x() / 90) - 1]->CD>0)charac_slots[(event->x() / 90) - 1]->CD--;
+                        }
+                        // 檢查技能好了嗎
+                        for (int i=0; i < int(charac_slots.size()); i++){
+                            charac_slots[i]->attack_text->hide();
+                            if (charac_slots[i]->CD == 0){
+                                charac_slots[i]->charac_item->move(0 + i * 90, 350);
+                            }
+                        }
+                    }
+                    if (charac_slots[event->x() / 90]->charac_ID == 8
+                            || charac_slots[event->x() / 90]->charac_ID == 14) {
+                        if (double_combo) return;
+                        double_combo = true;
+                        charac_slots[event->x() / 90]->hit_more = 2;
+                    }
+                    if (charac_slots[event->x() / 90]->charac_ID == 9
+                            || charac_slots[event->x() / 90]->charac_ID == 11) skill = 9;
+                    if (charac_slots[event->x() / 90]->charac_ID == 12){
+                        for (int i=0; i<5; i++){
+                            runestones[i][0]->change_color("water", runestones[i][0]->status);
+                            runestones[i][1]->change_color("fire", runestones[i][1]->status);
+                            runestones[i][2]->change_color("earth", runestones[i][2]->status);
+                            runestones[i][3]->change_color("light", runestones[i][3]->status);
+                            runestones[i][4]->change_color("dark", runestones[i][4]->status);
+                            runestones[i][5]->change_color("heart", runestones[i][5]->status);
+                        }
+                        time_limit = 20;
+                        burn_road = false;
+                    }
 
-                charac_slots[event->x() / 90]->CD_reset();
-                charac_slots[event->x() / 90]->charac_item->move(0 + (event->x() / 90) * 90, 360);
+                    charac_slots[event->x() / 90]->CD_reset();
+                    charac_slots[event->x() / 90]->charac_item->move(0 + (event->x() / 90) * 90, 360);
+                }
+                else if (!basic){
+                    charac_slots[event->x() / 90]->attack_text->show();
+                    charac_slots[event->x() / 90]->attack_text->setText(QString::number(charac_slots[event->x() / 90]->CD));
+                }
             }
-            else if (!basic){
-                charac_slots[event->x() / 90]->attack_text->show();
-                charac_slots[event->x() / 90]->attack_text->setText(QString::number(charac_slots[event->x() / 90]->CD));
+            // 技能敘述
+            else if (event->button() == Qt::RightButton){
+                game_status = -2;
+                darken->show();
+                darken->raise();
+                skill_text->show();
+                skill_text->raise();
+                skill_text->setText(skill_descript[charac_slots[event->x() / 90]->charac_ID]);
             }
         }
         // 正常轉珠
-        else if (event->y() >= 510) {
-            if (can_move_runestone) {
+        else if (event->y() >= 510 && event->button() == Qt::LeftButton) {
+            if (game_status == -2){
+                darken->hide();
+                skill_text->hide();
+                game_status = 1;
+            }
+            else if (can_move_runestone) {
                 for (int i=0;i<int(charac_slots.size());i++) charac_slots[i]->attack_text->hide();
                 runestone_selected = true;
                 selected_runestone = make_pair((event->y()-510)/90, event->x()/90);
