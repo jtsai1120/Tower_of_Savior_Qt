@@ -1042,10 +1042,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 }
                 charac_slots[attack_wait_count]->damage_text->show();
                 charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
-                QFont damage_text_font("Consolas", 20, QFont::Bold);
                 charac_slots[attack_wait_count]->damage_text->move(250,40);
-                charac_slots[attack_wait_count]->damage_text->setFont(damage_text_font);
-                charac_slots[attack_wait_count]->damage_text->setStyleSheet("color: red");
                 show_damage(charac_slots[attack_wait_count]->damage_text, 500);
             }
             else{
@@ -1059,6 +1056,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
                 show_damage(charac_slots[attack_wait_count]->damage_text, 500);
             }
+
 
 
 

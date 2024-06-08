@@ -153,6 +153,16 @@ void Charac_slot::add_attack(Runestone_pair rp){
     if (skill_power == 6 || skill_power == 10)
         if (clr == "heart")
             extra_atk += rp.pair.size();
+    if (all_atk){
+        QFont attack_all_font("Consolas", 20, QFont::Bold);
+        damage_text->setStyleSheet("color: red");
+        damage_text->setFont(attack_all_font);
+    }
+    else{
+        QFont damage_text_font("Consolas", 10, QFont::Bold);
+        damage_text->setStyleSheet("color: white");
+        damage_text->setFont(damage_text_font);
+    }
 }
 
 void Charac_slot::new_round(){
