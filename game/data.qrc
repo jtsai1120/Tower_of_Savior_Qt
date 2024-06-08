@@ -84,5 +84,6 @@
         <file>dataset/GBC bgm.WAV</file>
         <file>dataset/character/ID15-2.png</file>
         <file>dataset/Bocchi BGM.WAV</file>
+        <file>dataset/ui/attack_all_fire.jpg</file>
     </qresource>
 </RCC>

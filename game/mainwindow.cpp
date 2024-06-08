@@ -167,6 +167,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     darken_opacityEffect->setOpacity(0.5); // 50% transparency
     darken->setGraphicsEffect(darken_opacityEffect);
 
+    attack_all = new QLabel(this);
+    attack_all_pic.load(":/dataset/ui/attack_all_fire.jpg");
+    attack_all->setPixmap(attack_all_pic);
+    attack_all->setFixedSize(355,130);
+    attack_opacityEffect = new QGraphicsOpacityEffect;
+    attack_opacityEffect->setOpacity(0.5); // 50% transparency
+    attack_all->setGraphicsEffect(attack_opacityEffect);
+    attack_all->move(100,195);
+    attack_all->hide();
+
+
     // 設定介面
     setting_pic.load(":/dataset/setting_pic.png");
     setting_pic = setting_pic.scaled(setting_pic.width()*2.5, setting_pic.height()*2.5);
@@ -1023,22 +1034,38 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
 
             //attack animation
+            if (charac_slots[attack_wait_count]->all_atk){
+                attack_all->show();
+                for (int i = 0; i < 3; i++){
+                    enemy[i]->hp = enemy[i]->hp - damage;
+                    enemy_hp[i]->hp_lost(level,i,damage);
+                }
+                charac_slots[attack_wait_count]->damage_text->show();
+                charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
+                QFont damage_text_font("Consolas", 20, QFont::Bold);
+                charac_slots[attack_wait_count]->damage_text->move(250,40);
+                charac_slots[attack_wait_count]->damage_text->setFont(damage_text_font);
+                charac_slots[attack_wait_count]->damage_text->setStyleSheet("color: red");
+                show_damage(charac_slots[attack_wait_count]->damage_text, 500);
+            }
+            else{
+                bullet[attack_wait_count]->bullet_item->show();
+                bullet[attack_wait_count]->shoot(enemy[attack_enemy]->enemy_item->x()+60,enemy[attack_enemy]->enemy_item->y()+60);
+                qDebug()<<damage;
+                enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
+                enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
+                charac_slots[attack_wait_count]->damage_text->show();
+                charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
+                charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
+                show_damage(charac_slots[attack_wait_count]->damage_text, 500);
+            }
 
-            bullet[attack_wait_count]->bullet_item->show();
-            bullet[attack_wait_count]->shoot(enemy[attack_enemy]->enemy_item->x()+60,enemy[attack_enemy]->enemy_item->y()+60);
 
-
-            charac_slots[attack_wait_count]->damage_text->show();
-            charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
-            charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
-            show_damage(charac_slots[attack_wait_count]->damage_text, 500);
 
             if (!basic) damage *= 0.001;
             if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
 
-            qDebug()<<damage;
-            enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
-            enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
+
 
 
             if ((enemy[attack_enemy]->hp) <= 0){
@@ -1206,6 +1233,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
         }
 
         // 敵人的攻擊
+        attack_all->hide();
         for (int i = 0; i < 3; i++){
             if (enemy[i]->cd == 0){
                 if (level == 1){

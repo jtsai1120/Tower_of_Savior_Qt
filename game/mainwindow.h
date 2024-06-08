@@ -131,6 +131,11 @@ private:
     //show bullet
     vector<Bullet*> bullet;
 
+    //attack all
+    QLabel *attack_all;
+    QPixmap attack_all_pic;
+    QGraphicsOpacityEffect *attack_opacityEffect;
+
     QLabel *ui_text;
     QLabel *skill_text;
     QLabel *cd_text1;

@@ -39,6 +39,7 @@ public:
 
     int hit_more;
     int leader;
+    bool all_atk = false; // 若消除一組>5顆，則攻擊為全體攻擊
 
 private:
     QPixmap empty_slot;
@@ -52,7 +53,7 @@ private:
 
 
     bool basic;
-    bool all_atk = false; // 若消除一組>5顆，則攻擊為全體攻擊
+
 };
 
 #endif // CHARAC_SLOT_H
