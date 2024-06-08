@@ -842,6 +842,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
 void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在這裡
     if (is_first_count) {
         // Reset
+        attack_all->hide();
         qDebug() << "reset combo count";
         combo = 0;
         combo_count();
@@ -876,6 +877,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 if (level == 3){ // 結束了
                     ui_button->hide();
                     ui_text->hide();
+                    attack_all->hide();
                     enemy[0]->enemy_item->hide();
 
                     gameover_text->setStyleSheet("color: yellow");
@@ -1574,6 +1576,7 @@ void MainWindow::game_over(){
     for (int i = 0; i < 6; i++){
         bullet[i]->bullet_item->hide();
     }
+    attack_all->hide();
 }
 
 void MainWindow::show_damage(QLabel *text, int seconds){
