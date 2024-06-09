@@ -628,7 +628,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
                         charac_slots[event->x() / 90]->hit_more = 2;
                     }
                     if (charac_slots[event->x() / 90]->charac_ID == 9
-                            || charac_slots[event->x() / 90]->charac_ID == 11) skill = 9;
+                            || charac_slots[event->x() / 90]->charac_ID == 11){
+                        if (skill == 9) return;
+                        else skill = 9;
+                    }
                     if (charac_slots[event->x() / 90]->charac_ID == 12){
                         for (int i=0; i<5; i++){
                             runestones[i][0]->change_color("water", runestones[i][0]->status);
