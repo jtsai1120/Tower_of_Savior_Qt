@@ -877,6 +877,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                     ui_button->hide();
                     ui_text->hide();
                     enemy[0]->enemy_item->hide();
+                    attack_all->hide();
 
                     gameover_text->setStyleSheet("color: yellow");
                     gameover_text->resize(1000, 1000);
@@ -969,7 +970,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             icon_bar->change_status("hp", 1.0 - hp/init_hp);
             icon_bar->hp_text->setText(QString::number(hp) + "/" + QString::number(init_hp));
 
-            combo_cd->start(90);
+            combo_cd->start(190);
             return;
         }
 
@@ -1002,94 +1003,143 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
             if (level == 3){
                 attack_enemy = 0;
             }
-            damage = 0;
-            qDebug()<<"before"<<enemy[attack_enemy]->hp;
-
-            float advantage_attribute = 1; // 直接代表克制屬性倍率
-
-            if (charac_slots[attack_wait_count]->attribute == "water" && enemy[attack_enemy]->enemy_clr == "fire")
-                advantage_attribute = 2;
-            else if (charac_slots[attack_wait_count]->attribute == "water" && enemy[attack_enemy]->enemy_clr == "earth")
-                advantage_attribute = 0.5;
-            else if (charac_slots[attack_wait_count]->attribute == "fire" && enemy[attack_enemy]->enemy_clr == "earth")
-                advantage_attribute = 2;
-            else if (charac_slots[attack_wait_count]->attribute == "fire" && enemy[attack_enemy]->enemy_clr == "water")
-                advantage_attribute = 0.5;
-            else if (charac_slots[attack_wait_count]->attribute == "earth" && enemy[attack_enemy]->enemy_clr == "water")
-                advantage_attribute = 2;
-            else if (charac_slots[attack_wait_count]->attribute == "earth" && enemy[attack_enemy]->enemy_clr == "fire")
-                advantage_attribute = 0.5;
-            else if (charac_slots[attack_wait_count]->attribute == "light" && enemy[attack_enemy]->enemy_clr == "dark")
-                advantage_attribute = 2;
-            else if (charac_slots[attack_wait_count]->attribute == "dark" && enemy[attack_enemy]->enemy_clr == "light")
-                advantage_attribute = 2;
-
-            // 角色8、13的技能
-            if (charac_slots[attack_wait_count]->skill_power == 7
-                    || charac_slots[attack_wait_count]->skill_power == 13) advantage_attribute = 2;
-            if (charac_slots[attack_wait_count]->skill_power >= 0 &&
-                    charac_slots[attack_wait_count]->skill_power <= 4) advantage_attribute = 2;
-
-            damage = advantage_attribute * charac_slots[attack_wait_count]->attack;
-            qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
-
             //attack animation
-            if (charac_slots[attack_wait_count]->all_atk){
+            if (charac_slots[attack_wait_count]->all_atk && !basic){
                 attack_all->show();
                 for (int i = 0; i < 3; i++){
-                    enemy[i]->hp = enemy[i]->hp - damage;
-                    enemy_hp[i]->hp_lost(level,i,damage);
+                    if (enemy[i]->hp > 0){
+                        damage = 0;
+                        qDebug()<<"before"<<enemy[i]->hp;
+                        float advantage_attribute = 1; // 直接代表克制屬性倍率
+
+                        if (charac_slots[attack_wait_count]->attribute == "water" && enemy[i]->enemy_clr == "fire")
+                            advantage_attribute = 2;
+                        else if (charac_slots[attack_wait_count]->attribute == "water" && enemy[i]->enemy_clr == "earth")
+                            advantage_attribute = 0.5;
+                        else if (charac_slots[attack_wait_count]->attribute == "fire" && enemy[i]->enemy_clr == "earth")
+                            advantage_attribute = 2;
+                        else if (charac_slots[attack_wait_count]->attribute == "fire" && enemy[i]->enemy_clr == "water")
+                            advantage_attribute = 0.5;
+                        else if (charac_slots[attack_wait_count]->attribute == "earth" && enemy[i]->enemy_clr == "water")
+                            advantage_attribute = 2;
+                        else if (charac_slots[attack_wait_count]->attribute == "earth" && enemy[i]->enemy_clr == "fire")
+                            advantage_attribute = 0.5;
+                        else if (charac_slots[attack_wait_count]->attribute == "light" && enemy[i]->enemy_clr == "dark")
+                            advantage_attribute = 2;
+                        else if (charac_slots[attack_wait_count]->attribute == "dark" && enemy[i]->enemy_clr == "light")
+                            advantage_attribute = 2;
+                        // 角色8、13的技能
+                        if (charac_slots[attack_wait_count]->skill_power == 7
+                                || charac_slots[attack_wait_count]->skill_power == 13) advantage_attribute = 2;
+                        if (charac_slots[attack_wait_count]->skill_power >= 0 &&
+                                charac_slots[attack_wait_count]->skill_power <= 4) advantage_attribute = 2;
+
+                        damage = advantage_attribute * charac_slots[attack_wait_count]->attack;
+
+                        damage *= 0.001;
+                        if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
+
+                        enemy[i]->hp = enemy[i]->hp - damage;
+                        enemy_hp[i]->hp_lost(level,i,damage);
+                    }
+                    charac_slots[attack_wait_count]->damage_text->show();
+                    charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage * 1000));
+                    charac_slots[attack_wait_count]->damage_text->move(250,40);
+                    show_damage(charac_slots[attack_wait_count]->damage_text, 500);
+
+                    if ((enemy[i]->hp) <= 0){
+                        enemy[i]->dead = true;
+                        enemy_hp[i]->hp_bar->move(0,1000);
+                        if (i == 0)
+                            cd_text1->hide();
+                        else if (i == 1)
+                            cd_text2->hide();
+                        else if (i == 2)
+                            cd_text3->hide();
+                        if (survive.size() > 0)
+                            survive.erase(remove(survive.begin(), survive.end(), i), survive.end());
+                        else
+                            survive.clear();
+                        qDebug()<<enemy[i]->enemy_clr<<"is dead";
+                    }
+                    qDebug()<<charac_slots[attack_wait_count]->attribute<<"attacks"<<enemy[i]->enemy_clr;
+                    qDebug()<<"Damage is :"<<damage;
+                    if (survive.size() == 0){
+                        for (int i = 0; i < 6; i++){
+                            charac_slots[i]->attack = 0;
+                        }
+                    }
+                    qDebug()<<"after"<<enemy[i]->hp;
                 }
-                charac_slots[attack_wait_count]->damage_text->show();
-                charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
-                charac_slots[attack_wait_count]->damage_text->move(250,40);
-                show_damage(charac_slots[attack_wait_count]->damage_text, 500);
             }
             else{
+                damage = 0;
+                qDebug()<<"before"<<enemy[attack_enemy]->hp;
+
+                float advantage_attribute = 1; // 直接代表克制屬性倍率
+
+                if (charac_slots[attack_wait_count]->attribute == "water" && enemy[attack_enemy]->enemy_clr == "fire")
+                    advantage_attribute = 2;
+                else if (charac_slots[attack_wait_count]->attribute == "water" && enemy[attack_enemy]->enemy_clr == "earth")
+                    advantage_attribute = 0.5;
+                else if (charac_slots[attack_wait_count]->attribute == "fire" && enemy[attack_enemy]->enemy_clr == "earth")
+                    advantage_attribute = 2;
+                else if (charac_slots[attack_wait_count]->attribute == "fire" && enemy[attack_enemy]->enemy_clr == "water")
+                    advantage_attribute = 0.5;
+                else if (charac_slots[attack_wait_count]->attribute == "earth" && enemy[attack_enemy]->enemy_clr == "water")
+                    advantage_attribute = 2;
+                else if (charac_slots[attack_wait_count]->attribute == "earth" && enemy[attack_enemy]->enemy_clr == "fire")
+                    advantage_attribute = 0.5;
+                else if (charac_slots[attack_wait_count]->attribute == "light" && enemy[attack_enemy]->enemy_clr == "dark")
+                    advantage_attribute = 2;
+                else if (charac_slots[attack_wait_count]->attribute == "dark" && enemy[attack_enemy]->enemy_clr == "light")
+                    advantage_attribute = 2;
+
+                // 角色8、13的技能
+                if (charac_slots[attack_wait_count]->skill_power == 7
+                        || charac_slots[attack_wait_count]->skill_power == 13) advantage_attribute = 2;
+                if (charac_slots[attack_wait_count]->skill_power >= 0 &&
+                        charac_slots[attack_wait_count]->skill_power <= 4) advantage_attribute = 2;
+
+                damage = advantage_attribute * charac_slots[attack_wait_count]->attack;
+                qDebug()<<charac_slots[attack_wait_count]->attack<<damage;
+
+                if (!basic) damage *= 0.001;
+                if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
                 bullet[attack_wait_count]->bullet_item->show();
                 bullet[attack_wait_count]->shoot(enemy[attack_enemy]->enemy_item->x()+60,enemy[attack_enemy]->enemy_item->y()+60);
                 qDebug()<<damage;
                 enemy[attack_enemy]->hp = enemy[attack_enemy]->hp - damage;
                 enemy_hp[attack_enemy]->hp_lost(level,attack_enemy,damage);
                 charac_slots[attack_wait_count]->damage_text->show();
-                charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage));
+                charac_slots[attack_wait_count]->damage_text->setText(QString::number(damage * 1000));
                 charac_slots[attack_wait_count]->damage_text->move(enemy[attack_enemy]->enemy_item->x()+damage_text_pos[attack_wait_count][0],enemy[attack_enemy]->enemy_item->y()+damage_text_pos[attack_wait_count][1]);
                 show_damage(charac_slots[attack_wait_count]->damage_text, 500);
-            }
 
-
-
-
-            if (!basic) damage *= 0.001;
-            if (!basic && (level == 3) && (combo < 10)) damage = 0; // 10+ combo盾
-
-
-
-
-            if ((enemy[attack_enemy]->hp) <= 0){
-                enemy[attack_enemy]->dead = true;
-                enemy_hp[attack_enemy]->hp_bar->move(0,1000);
-                if (attack_enemy == 0)
-                    cd_text1->hide();
-                else if (attack_enemy == 1)
-                    cd_text2->hide();
-                else if (attack_enemy == 2)
-                    cd_text3->hide();
-                if (survive.size() > 0)
-                    survive.erase(remove(survive.begin(), survive.end(), attack_enemy), survive.end());
-                else
-                    survive.clear();
-                qDebug()<<enemy[attack_enemy]->enemy_clr<<"is dead";
-            }
-            qDebug()<<charac_slots[attack_wait_count]->attribute<<"attacks"<<enemy[attack_enemy]->enemy_clr;
-            qDebug()<<"Damage is :"<<damage;
-            if (survive.size() == 0){
-                for (int i = 0; i < 6; i++){
-                    charac_slots[i]->attack = 0;
+                if ((enemy[attack_enemy]->hp) <= 0){
+                    enemy[attack_enemy]->dead = true;
+                    enemy_hp[attack_enemy]->hp_bar->move(0,1000);
+                    if (attack_enemy == 0)
+                        cd_text1->hide();
+                    else if (attack_enemy == 1)
+                        cd_text2->hide();
+                    else if (attack_enemy == 2)
+                        cd_text3->hide();
+                    if (survive.size() > 0)
+                        survive.erase(remove(survive.begin(), survive.end(), attack_enemy), survive.end());
+                    else
+                        survive.clear();
+                    qDebug()<<enemy[attack_enemy]->enemy_clr<<"is dead";
                 }
+                qDebug()<<charac_slots[attack_wait_count]->attribute<<"attacks"<<enemy[attack_enemy]->enemy_clr;
+                qDebug()<<"Damage is :"<<damage;
+                if (survive.size() == 0){
+                    for (int i = 0; i < 6; i++){
+                        charac_slots[i]->attack = 0;
+                    }
+                }
+                qDebug()<<"after"<<enemy[attack_enemy]->hp;
             }
-            qDebug()<<"after"<<enemy[attack_enemy]->hp;
-
         }
 
         if (charac_slots[attack_wait_count]->hit_more < 1){
@@ -1573,6 +1623,7 @@ void MainWindow::game_over(){
 
     for (int i = 0; i < 6; i++){
         bullet[i]->bullet_item->hide();
+        charac_slots[i]->attack_text->hide();
     }
 }
 
