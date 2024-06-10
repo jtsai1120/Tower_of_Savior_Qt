@@ -25,12 +25,6 @@
         <file>dataset/runestone/heart_stone.png</file>
         <file>dataset/runestone/light_stone.png</file>
         <file>dataset/runestone/water_stone.png</file>
-        <file>dataset/runestone/weathered_dark_stone.png</file>
-        <file>dataset/runestone/weathered_earth_stone.png</file>
-        <file>dataset/runestone/weathered_fire_stone.png</file>
-        <file>dataset/runestone/weathered_heart_stone.png</file>
-        <file>dataset/runestone/weathered_light_stone.png</file>
-        <file>dataset/runestone/weathered_water_stone.png</file>
         <file>dataset/ui/cd_bar.png</file>
         <file>dataset/ui/cd_icon.png</file>
         <file>dataset/ui/cursur.png</file>
@@ -60,5 +54,36 @@
         <file>dataset/ui/start button.jpg</file>
         <file>dataset/ui/darken.png</file>
         <file>dataset/ui/empty button.jpg</file>
+        <file>dataset/character/ID6.png</file>
+        <file>dataset/character/ID7.png</file>
+        <file>dataset/character/ID8.png</file>
+        <file>dataset/character/ID10.png</file>
+        <file>dataset/character/ID9.png</file>
+        <file>dataset/runestone/weathered_heart_stone.png</file>
+        <file>dataset/runestone/weathered_light_stone.png</file>
+        <file>dataset/runestone/weathered_water_stone.png</file>
+        <file>dataset/runestone/weathered_dark_stone.png</file>
+        <file>dataset/runestone/weathered_earth_stone.png</file>
+        <file>dataset/runestone/weathered_fire_stone.png</file>
+        <file>dataset/game_win.wav</file>
+        <file>dataset/setting_select.wav</file>
+        <file>dataset/setting_pic.png</file>
+        <file>dataset/ui/surrender button.jpg</file>
+        <file>dataset/ui/full_darken.png</file>
+        <file>dataset/ui/back button.jpg</file>
+        <file>dataset/game_lose.wav</file>
+        <file>dataset/ui/restart button.jpg</file>
+        <file>dataset/menu_bgm.wav</file>
+        <file>dataset/ui/attack.png</file>
+        <file>dataset/character/ID11.png</file>
+        <file>dataset/character/ID11-2.png</file>
+        <file>dataset/character/ID12.png</file>
+        <file>dataset/character/ID13.png</file>
+        <file>dataset/character/ID14.png</file>
+        <file>dataset/character/ID15.png</file>
+        <file>dataset/GBC bgm.WAV</file>
+        <file>dataset/character/ID15-2.png</file>
+        <file>dataset/Bocchi BGM.WAV</file>
+        <file>dataset/ui/attack_all_fire.jpg</file>
     </qresource>
 </RCC>

@@ -8,9 +8,13 @@
 class Bg {
 public:
     Bg(QWidget *parent = nullptr);
-private:
-    QSound *battle_bgm;
 
+    QSound *battle_bgm;
+    QSound *menu_bgm;
+    QSound *win_bgm;
+
+    void set_bgm(int what_song);
+private:
     QPixmap battle_bg_pic;
     QLabel *battle_bg;
     QPixmap runestone_bg_pic;

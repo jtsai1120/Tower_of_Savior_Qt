@@ -5,6 +5,10 @@
 #include <QPixmap>
 #include <vector>
 #include <QDebug>
+#include <QImage>
+#include <QColor>
+#include <QPainter>
+
 using namespace std;
 
 class Enemy_hp{
@@ -21,6 +25,8 @@ public:
     int current_hp = 90;
     int current_length;
     int max_length = 90;
+    void changeImageColor(int level, int enemy);
+    void reset();
 
 };
 

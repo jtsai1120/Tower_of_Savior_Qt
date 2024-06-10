@@ -17,8 +17,6 @@ public:
 
     void cd_reset(int level);
 
-    void new_round();
-
     vector <int> charac_heal;
     //vector <int> charac_hp;
 
@@ -48,7 +46,7 @@ public:
 
 private:
 
-
+    bool basic = true;
     bool all_atk = false; // 若消除一組>5顆，則攻擊為全體攻擊
 };
 
