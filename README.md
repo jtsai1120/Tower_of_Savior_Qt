@@ -23,7 +23,8 @@
 #### Choosing characters
     You can choose 6 characters at most, and the captain and the vice-captain must be selected.
 - You can choose the character by pressing left button on the mouse on the empty character slots.
-- For faster selection, you can press the right button on the mouse, five characters would be passed for each click.  
+- For faster selection, you can press the right button on the mouse, five characters would be passed for each click.
+- Whenever during the game, you can press the setting button on the upper right corner to see the detailed informaiton of different level (of the current mission).
 
 #### Runestone drifting
     Runestone drifting would be the main source of your attack power
@@ -73,5 +74,25 @@ $ ./Project2_Group16
 
 # Project Attainment
     What requirements and bonus we had done and implement in this project.
-1. 
+### Mission 2 (Bonus)
+    In the following, only the bonus parts which are not included in basic requirement will be listed.
+
+#### Basic setting
+- In mission 2, the attack power of character will be higher. At the same time, the attack power of the enemy and its HP increases, too.
+- CD of each enemy may be different from mission 1.
+- Your HP will also be higher in mission 2.
+
+#### Choosing characters
+- When choosing the characters, the space below the character slots will show the skill of the character
+
+#### Character skills
+- Whenever the skill is available, the position of the character will be a little higher than the original position, you can use the skill of particular character by pressing the picture of the character
+- After using the skill, you will not be able to use it again unless its skill CD turns 0.     
+
+#### Attack and attributes
+- In mission 2, when you eliminate a certain attribute runestone a time, say, five water runestones in a row or column, then the water character will be able to attack every enemy that still survive at that moment.
+  
+
+
+
 
