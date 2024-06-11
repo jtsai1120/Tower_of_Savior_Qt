@@ -73,7 +73,7 @@ $ ./Project2_Group16
 # Project Attainment
     What requirements and bonus we had done and implement in this project.
 ## Mission 2 (Bonus)
-    In the following, only the bonus parts which are not included in basic requirement will be listed.
+    In the following part, only the bonus parts which are not included in basic requirement will be listed.
 
 ### Basic setting
 - In mission 2, the attack power of character will be higher. At the same time, the attack power of the enemy and its HP increases, too.
