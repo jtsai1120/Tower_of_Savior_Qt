@@ -58,7 +58,6 @@
 # How to Compile & Run (for Linux Bash)
 In the game folder ( /game/ ) , use the following command :
 ```bash
-$ qmake-qt5 “QT+=widgets” “QT+=coregui” “QT+=widgetsmultimedia”
 $ make
 ```
 Run:
