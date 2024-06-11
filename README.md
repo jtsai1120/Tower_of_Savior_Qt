@@ -56,17 +56,6 @@
 
 
 # How to Compile & Run (for Linux Bash)
-- In the game folder ( /game/ ) , use the following command :
-```bash
-$ make
-$ ./Project1_v2
-```
-> Notice : If you are using Cygwin, you should open another terminal and input:<br> 
-```$ startxwin```<br>
-then back to the initial terminal and input:<br>
-```$ export DISPLAY=:0.0```<br>
-before you actually run the executable file.
-
 In the game folder ( /game/ ) , use the following command :
 ```bash
 $ qmake-qt5 “QT+=widgets” “QT+=coregui” “QT+=widgetsmultimedia”
