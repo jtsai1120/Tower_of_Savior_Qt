@@ -55,7 +55,7 @@
 
 # How to Compile & Run (for Windows)
     Since the compiled game folder is too large, we upload it to google drive.
-[Link](https://drive.google.com/file/d/1tJ_W3UWEG7dZ6YxE7hupTprwsLMTu3DJ/view?usp=sharing)
+[Link](https://drive.google.com/file/d/1UTEfMYM121nIyHWsOH71pBdzzKcTTddS/view?usp=sharing)
 1. Download the zip file and upzip the file.
 2. run the file under the path: ./release/Project2_Group16.exe
 
