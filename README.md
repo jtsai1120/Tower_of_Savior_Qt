@@ -9,6 +9,10 @@
 - **蔡承希**：Runestones, Runestones Drifting, Combo Calculation, Combo Eliminate, Drop Animation, Setting menu, Hp / Countdown bar
 - **蔡辰鑫**：Enemy(CD, Hp bar), Attack Effect, Attack all
 - **黃士洵**：Characters(Skills), Character selecting menu, Damage Calculation, Burned / Weathered Runestones and Burning trace
+=======
+- **蔡承希**：
+- **蔡辰鑫**：
+- **黃士洵**：
 
 # Basic intro.
 
