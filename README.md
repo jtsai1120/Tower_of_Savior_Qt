@@ -53,12 +53,6 @@
 ### Next level
     After defeating every enemy in the current level, you will enter the next level (there are three levels in total)
 
-# How to Compile & Run (for Windows)
-    Since the compiled game folder is too large, we upload it to google drive.
-[Link](https://drive.google.com/file/d/15IZvc6v-RJ7daGYePPy4gHfH7QNXDGnL/view?usp=sharing)
-1. Download the zip file and upzip the file.
-2. run the file under the path: ./release/Project2_Group16.exe
-
 # How to Compile & Run (for Cygwin)
 In the game folder ( /game/ ) , use the following command :
 ```bash
