@@ -703,7 +703,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         }
         runestone_selected = false;
         runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-        runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1);
+        //runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1.0);
         if (runestone_drift && !move_free) {
             // 第一種結束方式： 放開 Cursor (第二種結束方式： 倒數時間到)
             drift_timer->stop();
@@ -807,7 +807,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             }
 
             runestones[selected_runestone.first][selected_runestone.second]->move(selected_runestone.first, selected_runestone.second);
-            runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1);
+            //runestones[selected_runestone.first][selected_runestone.second]->set_opacity(1);
             selected_runestone = make_pair((event->y()-510)/90, event->x()/90); 
             if (!drift_timer_started) { // 開始計時
                 ms_elapsed = 0; // 計時器 (經過多少 ms)
@@ -818,7 +818,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
             }
         }
         runestones[selected_runestone.first][selected_runestone.second]->stick_cursor(event->x(), event->y());
-        runestones[selected_runestone.first][selected_runestone.second]->set_opacity(0.5);
+        //runestones[selected_runestone.first][selected_runestone.second]->set_opacity(0.5);
     }
     if (runestone_drift) {
         // 使 Cursor 無法移動到畫面外導致 Crash
@@ -845,15 +845,22 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
 void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在這裡
     if (is_first_count) {
         // Reset
+        attack_all->hide();
         qDebug() << "reset combo count";
         combo = 0;
         combo_count();
     } else if (game_status == 1){ // 準備攻擊及回血
-        for (int i = 0; i < cur_pair_num; i++) delete light_halo_vfxs[i];
+        for (int i = 0; i < cur_pair_num; i++) {
+            if (light_halo_vfxs[i]!=nullptr) {
+                for (auto h : light_halo_vfxs[i]->halos)
+                    h->hide();
+                delete light_halo_vfxs[i];
+            }
+        }
         light_halo_vfxs.clear();
-        for (auto row : runestones)
-            for (auto i : row)
-                i->set_opacity(1);
+        //for (auto row : runestones)
+            //for (auto i : row)
+                //i->set_opacity(1);
         QTimer::singleShot(105, [&](){
             if (combo_counter.count(runestones).empty()) {
                 qDebug() << "final combo : " << combo;
@@ -879,6 +886,7 @@ void MainWindow::combo_count_and_drop(bool is_first_count) { // 回合計算在�
                 if (level == 3){ // 結束了
                     ui_button->hide();
                     ui_text->hide();
+                    attack_all->hide();
                     enemy[0]->enemy_item->hide();
                     attack_all->hide();
 
@@ -1580,9 +1588,10 @@ void MainWindow::drop_detect() {
         }
     }
     QTimer::singleShot((max_wait_time+1)*105, [&](){
-        for (auto &row : tmp_runestones) {
-            for (auto &i : row) {
-                delete i;
+        for (auto row : tmp_runestones) {
+            for (auto i : row) {
+                if (i!=nullptr)
+                    delete i;
             }
         }
         for (int i = 0; i < 5; i++) {
@@ -1628,6 +1637,7 @@ void MainWindow::game_over(){
         bullet[i]->bullet_item->hide();
         charac_slots[i]->attack_text->hide();
     }
+    attack_all->hide();
 }
 
 void MainWindow::show_damage(QLabel *text, int seconds){

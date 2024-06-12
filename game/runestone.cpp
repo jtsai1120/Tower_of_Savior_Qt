@@ -41,7 +41,7 @@ Runestone::Runestone(QWidget *parent, int _row, int _col, QString clr, int get_s
     drop_animation = new QPropertyAnimation(runestone, "pos");
     game_over_drop_animation = new QPropertyAnimation(runestone, "geometry");
 
-    opacityEffect = new QGraphicsOpacityEffect;
+    //opacityEffect = new QGraphicsOpacityEffect;
 }
 
 Runestone::~Runestone() {
@@ -88,14 +88,14 @@ void Runestone::change_color(QString clr, int get_status) {
 
 void Runestone::stick_cursor(int _x, int _y) {
     runestone->move(_x-dark_stone_pic.width()/2-10, _y-dark_stone_pic.height()/2-10);
-    set_opacity(0.5);
+    //set_opacity(0.5);
 }
-
-void Runestone::set_opacity(double n) {
+/*
+void Runestone::set_opacity(float n) {
     opacityEffect->setOpacity(n); // 50% transparency
     runestone->setGraphicsEffect(opacityEffect);
 }
-
+*/
 void Runestone::drop(int row, int _row) {
     if (_row <= row) return;
     drop_animation->setEasingCurve(QEasingCurve::OutCurve);

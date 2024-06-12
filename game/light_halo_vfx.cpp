@@ -39,12 +39,12 @@ void Light_halo_vfx::show(Runestone_pair rp) {
     }
     // 開始計時變化
     ms_elapsed = 0;
-    change_timer->start(1);
+    change_timer->start(10);
 }
 
 void Light_halo_vfx::change() {
     const int changing_unit = 85;
-    ms_elapsed++;
+    ms_elapsed+=10;
     if (ms_elapsed < changing_unit) {
         for (int i = 0; i < int(runestone_pair.pair.size()); i++) {
             double size = 90.0*double(ms_elapsed)/double(changing_unit);

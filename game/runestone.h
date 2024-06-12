@@ -23,7 +23,7 @@ public:
 
     void stick_cursor(int _x, int _y);
 
-    void set_opacity(double n);
+    //void set_opacity(float n);
 
     void game_over_drop();
 
@@ -49,8 +49,6 @@ private:
     QPixmap weathered_light_stone_pic;
     QPixmap weathered_water_stone_pic;
 
-
-
     QLabel *runestone;
 
     QString color;
@@ -60,7 +58,7 @@ private:
     QPropertyAnimation *drop_animation;
     QPropertyAnimation *game_over_drop_animation;
 
-    QGraphicsOpacityEffect *opacityEffect;
+   // QGraphicsOpacityEffect *opacityEffect;
 };
 
 #endif // RUNESTONE_H

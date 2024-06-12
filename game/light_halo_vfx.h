@@ -13,6 +13,8 @@ class Light_halo_vfx : public QObject {
 public:
     Light_halo_vfx(QWidget *parent);
     void show(Runestone_pair rp);
+
+    vector<QLabel*> halos;
 private slots:
     void change();
 
@@ -26,7 +28,7 @@ private:
 
     QString clr;
 
-    vector<QLabel*> halos;
+    
     QTimer *change_timer;
     int ms_elapsed;
     Runestone_pair runestone_pair;
